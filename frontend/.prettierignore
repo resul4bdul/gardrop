@@ -1,0 +1,7 @@
+dist
+node_modules
+package-lock.json
+# Vendored verbatim port-lar — yenidən formatlanmır (dizayn 1:1 port).
+src/app/GardropApp.tsx
+src/admin/AdminApp.tsx
+src/magaza/MagazaApp.tsx
