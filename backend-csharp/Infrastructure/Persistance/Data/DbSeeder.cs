@@ -30,6 +30,11 @@ public static class DbSeeder
         if (!await db.Coupons.AnyAsync())
             db.Coupons.AddRange(CatalogSeed.Coupons());
 
+        // Komissiya dərəcələri — hər mağaza üçün default 10% (idempotent; yalnız heç yoxdursa).
+        if (!await db.StoreCommissions.AnyAsync())
+            foreach (var st in CatalogSeed.Stores())
+                db.StoreCommissions.Add(new Gardrop.Core.Domain.Models.StoreCommission { StoreId = st.Id, Category = "", Percent = 10m });
+
         // Mövcud (köhnə) mağaza sətirlərində koordinat boşdursa seed dəyərləri ilə doldur.
         var seedStores = CatalogSeed.Stores().ToDictionary(s => s.Id);
         foreach (var s in await db.Stores.Where(s => s.Lat == null).ToListAsync())

@@ -1,5 +1,6 @@
 using Gardrop.Core.Application.Common;
 using Gardrop.Core.Application.Common.DTOs;
+using Gardrop.Core.Application.Common.Helpers;
 using Gardrop.Core.Application.Common.Interfaces;
 using Gardrop.Core.Domain.Enums;
 using Gardrop.Core.Domain.Models;
@@ -18,7 +19,7 @@ public class DisputeService : IDisputeService
 
     public async Task<OpResult> CreateAsync(long userId, long orderId, DisputeCreateDto dto, CancellationToken ct = default)
     {
-        var reason = (dto.Reason ?? "").Trim();
+        var reason = InputSanitizer.CleanMultiline(dto.Reason);
         if (reason.Length < 5) return OpResult.Fail(400, "Şikayət səbəbini ətraflı yazın (min 5 simvol)");
 
         var order = await _db.Orders.AsNoTracking().Include(o => o.Items)

@@ -1,4 +1,5 @@
 using Gardrop.Core.Application.Common;
+using Gardrop.Core.Application.Common.Helpers;
 using Gardrop.Core.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,7 +39,7 @@ public class StoreOwnerReviewService : StoreOwnerServiceBase, IStoreOwnerReviewS
         var belongs = await _db.Products.AnyAsync(p => p.Id == r.ProductId && p.StoreId == storeId, ct);
         if (!belongs) return OpResult.Fail(403, "Bu rəy sizin mağazanıza aid deyil");
 
-        var reply = (dto.Reply ?? "").Trim();
+        var reply = InputSanitizer.CleanMultiline(dto.Reply);
         r.StoreReply = reply;
         r.StoreReplyAt = reply.Length > 0 ? DateTime.UtcNow : null;
         if (reply.Length > 0)

@@ -1,4 +1,5 @@
 using Gardrop.Core.Application.Common;
+using Gardrop.Core.Application.Common.Helpers;
 using Gardrop.Core.Application.Common.Interfaces;
 using Gardrop.Core.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -52,7 +53,7 @@ public class ReviewService : IReviewService
             UserId = userId,
             UserName = $"{user?.FirstName} {soyadInitial}".Trim(),
             Rating = r,
-            Comment = (dto.Comment ?? "").Trim(),
+            Comment = InputSanitizer.CleanMultiline(dto.Comment),
             ImageUrls = (dto.ImageUrls ?? new()).Where(u => !string.IsNullOrWhiteSpace(u)).Select(u => u.Trim()).Take(5).ToList(),
             CreatedAt = DateTime.UtcNow,
         };

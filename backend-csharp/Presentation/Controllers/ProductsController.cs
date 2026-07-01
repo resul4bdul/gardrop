@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Gardrop.Core.Application.Common.Interfaces;
 
 namespace Gardrop.Presentation.Controllers;
@@ -6,6 +7,7 @@ namespace Gardrop.Presentation.Controllers;
 // Nazik controller — kataloq məntiqi IProductCatalogService-dədir (Application qatı, bax menfiler D1/D2).
 [ApiController]
 [Route("api/products")]
+[EnableRateLimiting("search")]   // kataloq/axtarış scraping qarşısı (IP üzrə 40/dəq)
 public class ProductsController : ControllerBase
 {
     private readonly IProductCatalogService _catalog;

@@ -1,4 +1,5 @@
 using Gardrop.Core.Application.Common;
+using Gardrop.Core.Application.Common.Helpers;
 using Gardrop.Core.Application.Common.Interfaces;
 using Gardrop.Core.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -24,33 +25,34 @@ public class StoreProfileService : StoreOwnerServiceBase, IStoreProfileService
         var s = await OwnedAsync(userId, storeId, ct);
         if (s is null) return NotOwned;
 
-        if (dto.Name is not null && dto.Name.Trim().Length > 0) s.Name = dto.Name.Trim();
-        if (dto.City is not null) s.City = dto.City.Trim();
+        // Bütün mətn sahələri sanitizasiyadan keçir (idarəetmə/görünməz simvollar + trim).
+        if (dto.Name is not null && InputSanitizer.Clean(dto.Name).Length > 0) s.Name = InputSanitizer.Clean(dto.Name);
+        if (dto.City is not null) s.City = InputSanitizer.Clean(dto.City);
         if (dto.Established.HasValue) s.Established = dto.Established.Value;
-        if (dto.Address is not null) s.Address = dto.Address.Trim();
-        if (dto.Logo is not null) s.Logo = dto.Logo.Trim();
+        if (dto.Address is not null) s.Address = InputSanitizer.Clean(dto.Address);
+        if (dto.Logo is not null) s.Logo = InputSanitizer.Clean(dto.Logo);
         if (dto.Lat.HasValue) s.Lat = dto.Lat.Value;
         if (dto.Lng.HasValue) s.Lng = dto.Lng.Value;
 
         // FAZA 6 — public profil/sosial/əlaqə/çatdırılma
-        if (dto.Banner is not null) s.Banner = dto.Banner.Trim();
-        if (dto.Url is not null) s.Url = dto.Url.Trim();
-        if (dto.About is not null) s.About = dto.About.Trim();
-        if (dto.Instagram is not null) s.Instagram = dto.Instagram.Trim();
-        if (dto.Facebook is not null) s.Facebook = dto.Facebook.Trim();
-        if (dto.Tiktok is not null) s.Tiktok = dto.Tiktok.Trim();
-        if (dto.Whatsapp is not null) s.Whatsapp = dto.Whatsapp.Trim();
-        if (dto.Phone is not null) s.Phone = dto.Phone.Trim();
-        if (dto.Email is not null) s.Email = dto.Email.Trim();
+        if (dto.Banner is not null) s.Banner = InputSanitizer.Clean(dto.Banner);
+        if (dto.Url is not null) s.Url = InputSanitizer.Clean(dto.Url);
+        if (dto.About is not null) s.About = InputSanitizer.CleanMultiline(dto.About);
+        if (dto.Instagram is not null) s.Instagram = InputSanitizer.Clean(dto.Instagram);
+        if (dto.Facebook is not null) s.Facebook = InputSanitizer.Clean(dto.Facebook);
+        if (dto.Tiktok is not null) s.Tiktok = InputSanitizer.Clean(dto.Tiktok);
+        if (dto.Whatsapp is not null) s.Whatsapp = InputSanitizer.Clean(dto.Whatsapp);
+        if (dto.Phone is not null) s.Phone = InputSanitizer.Clean(dto.Phone);
+        if (dto.Email is not null) s.Email = InputSanitizer.Clean(dto.Email);
         if (dto.PrepDays.HasValue) s.PrepDays = dto.PrepDays.Value;
         if (dto.ReturnDays.HasValue) s.ReturnDays = dto.ReturnDays.Value;
 
         // FAZA 6 — həssas (bank/hüquqi/bildiriş)
-        if (dto.BankName is not null) s.BankName = dto.BankName.Trim();
-        if (dto.Iban is not null) s.Iban = dto.Iban.Trim();
-        if (dto.Beneficiary is not null) s.Beneficiary = dto.Beneficiary.Trim();
-        if (dto.Voen is not null) s.Voen = dto.Voen.Trim();
-        if (dto.LegalName is not null) s.LegalName = dto.LegalName.Trim();
+        if (dto.BankName is not null) s.BankName = InputSanitizer.Clean(dto.BankName);
+        if (dto.Iban is not null) s.Iban = InputSanitizer.Clean(dto.Iban);
+        if (dto.Beneficiary is not null) s.Beneficiary = InputSanitizer.Clean(dto.Beneficiary);
+        if (dto.Voen is not null) s.Voen = InputSanitizer.Clean(dto.Voen);
+        if (dto.LegalName is not null) s.LegalName = InputSanitizer.Clean(dto.LegalName);
         if (dto.NotifyNewOrder.HasValue) s.NotifyNewOrder = dto.NotifyNewOrder.Value;
         if (dto.NotifyNewReview.HasValue) s.NotifyNewReview = dto.NotifyNewReview.Value;
         if (dto.NotifyEmail.HasValue) s.NotifyEmail = dto.NotifyEmail.Value;

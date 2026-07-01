@@ -1,4 +1,5 @@
 using Gardrop.Core.Application.Common;
+using Gardrop.Core.Application.Common.Helpers;
 using Gardrop.Core.Application.Common.Interfaces;
 using Gardrop.Core.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -87,7 +88,7 @@ public class StoreOwnerOrderService : StoreOwnerServiceBase, IStoreOwnerOrderSer
             // Hazır işarələnmiş hissə artıq ləğv edilə bilməz.
             if (o.PreparedStores.Contains(storeId))
                 return OpResult.Fail(403, "Bu sifariş artıq hazırdır — ləğv edilə bilməz");
-            var reason = (dto.Reason ?? "").Trim();
+            var reason = InputSanitizer.CleanMultiline(dto.Reason);
             if (reason.Length < 3) return OpResult.Fail(400, "Ləğv səbəbini qeyd edin");
             await _orderStatus.ApplyStatusAsync(o, OrderStatus.Cancelled, reason, CancelledByParty.Store, ct);
             _notify.Notify(o.UserId, "order", "Sifariş ləğv edildi",
@@ -96,7 +97,7 @@ public class StoreOwnerOrderService : StoreOwnerServiceBase, IStoreOwnerOrderSer
             await tx.CommitAsync(ct);
             _rating.Request();  // fon, commit-dən sonra
             _ = SafeEmail(_email, o.User?.Email, "Sifarişiniz ləğv edildi",
-                $"<p><b>{o.OrderNo}</b> sifarişiniz mağaza tərəfindən ləğv edildi.</p><p>Səbəb: {reason}</p>");
+                $"<p><b>{System.Text.Encodings.Web.HtmlEncoder.Default.Encode(o.OrderNo)}</b> sifarişiniz mağaza tərəfindən ləğv edildi.</p><p>Səbəb: {System.Text.Encodings.Web.HtmlEncoder.Default.Encode(reason)}</p>");
             return OpResult.Ok(new StoreOrderCancelResult(o.Id, o.Status));
         }
 

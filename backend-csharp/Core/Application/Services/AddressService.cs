@@ -1,3 +1,4 @@
+using Gardrop.Core.Application.Common.Helpers;
 using Gardrop.Core.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +16,7 @@ public class AddressService : IAddressService
 
     public async Task<List<UserAddressDto>> CreateAsync(long userId, AddressDto dto, CancellationToken ct = default)
     {
-        var unvan = (dto.Unvan ?? "").Trim();
+        var unvan = InputSanitizer.Clean(dto.Unvan);
         // Eyni ünvanı təkrar əlavə etmə (checkout-dan avtomatik yazılma üçün).
         var dup = await _db.Addresses.AnyAsync(a => a.UserId == userId && a.Unvan == unvan, ct);
         if (!dup)
@@ -40,9 +41,9 @@ public class AddressService : IAddressService
         var addr = await _db.Addresses.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId, ct);
         if (addr is null) return null;
 
-        if (dto.Label is not null) addr.Label = dto.Label;
-        if (dto.Sehir is not null) addr.Sehir = dto.Sehir;
-        if (dto.Unvan is not null) addr.Unvan = dto.Unvan;
+        if (dto.Label is not null) addr.Label = InputSanitizer.Clean(dto.Label);
+        if (dto.Sehir is not null) addr.Sehir = InputSanitizer.Clean(dto.Sehir);
+        if (dto.Unvan is not null) addr.Unvan = InputSanitizer.Clean(dto.Unvan);
         if (dto.Lat is not null) addr.Lat = dto.Lat;
         if (dto.Lng is not null) addr.Lng = dto.Lng;
         if (dto.IsDefault == true)

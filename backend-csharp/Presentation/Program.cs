@@ -20,6 +20,16 @@ builder.Host.UseSerilog((ctx, cfg) => cfg
 builder.Services.AddGardropPersistence(builder.Configuration);
 builder.Services.AddGardropInfrastructure(builder.Configuration);
 
+// ── Secrets fail-fast (production) — sirlər env-dən gəlməlidir; boşdursa açılışda dayan (heç vaxt zəif default ilə işləmə).
+if (!builder.Environment.IsDevelopment())
+{
+    if (string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("Default")))
+        throw new InvalidOperationException("ConnectionStrings:Default production-da təyin edilməlidir (env: ConnectionStrings__Default).");
+    var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "";
+    if (jwtSecret.Length < 32)
+        throw new InvalidOperationException("Jwt:Secret production-da ən azı 32 simvol olmalıdır (env: Jwt__Secret).");
+}
+
 // YALNIZ Development: göndərilən OTP/təsdiq kodunu yaddaşda tut (e2e dev-mail seam, bax C.1).
 // IEmailSender real impl-i CapturingEmailSender ilə sarınır; prod-da bu qoşulmur.
 if (builder.Environment.IsDevelopment())
@@ -88,9 +98,20 @@ builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
 builder.Services.AddRateLimiter(o =>
 {
     o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    o.AddPolicy("auth", ctx => RateLimitPartition.GetFixedWindowLimiter(
-        ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+    static string Ip(HttpContext c) => c.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+    // Global (IP üzrə) — bütün sorğular üçün DoS/bot müdafiəsi (dəqiqədə 120).
+    o.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
+        RateLimitPartition.GetFixedWindowLimiter(Ip(ctx),
+            _ => new FixedWindowRateLimiterOptions { Window = TimeSpan.FromMinutes(1), PermitLimit = 120, QueueLimit = 0 }));
+
+    // "auth" — OTP/login brute-force qarşısı (IP üzrə, 10/dəq).
+    o.AddPolicy("auth", ctx => RateLimitPartition.GetFixedWindowLimiter(Ip(ctx),
         _ => new FixedWindowRateLimiterOptions { Window = TimeSpan.FromMinutes(1), PermitLimit = 10, QueueLimit = 0 }));
+
+    // "search" — kataloq/axtarış scraping qarşısı (IP üzrə, 40/dəq).
+    o.AddPolicy("search", ctx => RateLimitPartition.GetFixedWindowLimiter(Ip(ctx),
+        _ => new FixedWindowRateLimiterOptions { Window = TimeSpan.FromMinutes(1), PermitLimit = 40, QueueLimit = 0 }));
 });
 
 // ── JWT Authentication ──

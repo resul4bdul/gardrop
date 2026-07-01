@@ -1,3 +1,4 @@
+using Gardrop.Core.Application.Common.Helpers;
 using Gardrop.Core.Domain.Enums;
 
 namespace Gardrop.Core.Application.Services;
@@ -7,9 +8,9 @@ public class ProductWriter : IProductWriter
 {
     public void Apply(Product p, AdminProductDto d)
     {
-        if (d.Name is not null) p.Name = d.Name;
-        if (d.Store is not null) p.Store = d.Store;
-        if (d.Brand is not null) p.Brand = d.Brand.Trim();
+        if (d.Name is not null) p.Name = InputSanitizer.Clean(d.Name);
+        if (d.Store is not null) p.Store = InputSanitizer.Clean(d.Store);
+        if (d.Brand is not null) p.Brand = InputSanitizer.Clean(d.Brand);
         if (d.StoreId.HasValue) p.StoreId = d.StoreId.Value;
         if (d.Price.HasValue) p.Price = d.Price.Value;
         p.OldPrice = d.OldPrice;  // null = endirim yoxdur
@@ -27,14 +28,14 @@ public class ProductWriter : IProductWriter
         if (d.SizeBehavior is not null) p.SizeBehavior = d.SizeBehavior;
         if (d.WashShrink.HasValue) p.WashShrink = d.WashShrink.Value;
         if (d.SizeChart is not null) p.SizeChart = SanitizeChart(d.SizeChart);
-        if (d.Color is not null) p.Color = d.Color;
-        if (d.Material is not null) p.Material = d.Material;
-        if (d.Season is not null) p.Season = d.Season;
-        if (d.Tags is not null) p.Tags = d.Tags.Where(t => !string.IsNullOrWhiteSpace(t)).Select(t => t.Trim()).Distinct().ToList();
+        if (d.Color is not null) p.Color = InputSanitizer.Clean(d.Color);
+        if (d.Material is not null) p.Material = InputSanitizer.Clean(d.Material);
+        if (d.Season is not null) p.Season = InputSanitizer.Clean(d.Season);
+        if (d.Tags is not null) p.Tags = d.Tags.Select(t => InputSanitizer.Clean(t)).Where(t => t.Length > 0).Distinct().ToList();
         if (d.SeoTitle is not null) p.SeoTitle = d.SeoTitle.Trim();
         if (d.SeoDescription is not null) p.SeoDescription = d.SeoDescription.Trim();
         if (d.IsDraft.HasValue) p.IsDraft = d.IsDraft.Value;
-        if (d.Description is not null) p.Description = d.Description;
+        if (d.Description is not null) p.Description = InputSanitizer.CleanMultiline(d.Description);
 
         if (d.ImageUrls is not null)
         {
