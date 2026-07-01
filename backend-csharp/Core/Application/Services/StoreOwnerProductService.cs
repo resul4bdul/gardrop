@@ -1,4 +1,5 @@
 using Gardrop.Core.Application.Common;
+using Gardrop.Core.Application.Common.Helpers;
 using Gardrop.Core.Application.Common.Interfaces;
 using Gardrop.Core.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,7 @@ public class StoreOwnerProductService : StoreOwnerServiceBase, IStoreOwnerProduc
 
         var p = new Product();   // Id-ni DB identity verir (bax menfiler 2.3)
         _productWriter.Apply(p, dto);
+        p.Slug = await _db.UniqueProductSlugAsync(p.Name, ct);   // SEO slug (yaradılanda sabitlənir)
         p.StoreId = storeId; p.Store = s.Name;   // mağaza məcburi öz mağazasıdır
         p.ApprovalStatus = ApprovalStatus.Pending;  // yeni məhsul admin təsdiqini gözləyir
         p.RejectReason = "";

@@ -8,7 +8,7 @@ import { StatCard, SectionCard, Th, Td, Badge, Avatar, Segmented, EmptyState, ST
 import type { ApiFn, Store, Analytics, Dashboard as DashboardData } from "./types";
 
 const PERIODS: [string, string][] = [['today', 'Bugün'], ['7', 'Son 7 gün'], ['30', 'Son 30 gün'], ['12m', 'Son 12 ay']];
-const openProduct = (id?: number) => { if (id != null) window.open(`/gardrop.html#/product/${id}`, '_blank'); };
+const openProduct = (id?: number) => { if (id != null) window.open(`/product/${id}`, '_blank'); };
 
 export function Dashboard({ api, store }: { api: ApiFn; store: Store }) {
   const [d, setD] = useState<DashboardData | null>(null);

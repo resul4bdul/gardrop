@@ -112,6 +112,18 @@ export interface Store {
   address?: string;
   lat?: number | null;
   lng?: number | null;
+  // Public profil (StoreView) — mağaza səhifəsi üçün
+  banner?: string;
+  url?: string;
+  about?: string;
+  instagram?: string;
+  facebook?: string;
+  tiktok?: string;
+  whatsapp?: string;
+  phone?: string;
+  email?: string;
+  prepDays?: number | null;
+  returnDays?: number | null;
 }
 
 export interface Review {

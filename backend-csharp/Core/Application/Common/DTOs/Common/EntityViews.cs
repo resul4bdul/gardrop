@@ -12,6 +12,7 @@ public record ProductView
 {
     public int Id { get; init; }
     public string Name { get; init; } = "";
+    public string Slug { get; init; } = "";
     public string Store { get; init; } = "";
     public int StoreId { get; init; }
     public string Brand { get; init; } = "";
@@ -51,7 +52,7 @@ public record ProductView
 
     public static ProductView From(Product p) => new()
     {
-        Id = p.Id, Name = p.Name, Store = p.Store, StoreId = p.StoreId, Brand = p.Brand,
+        Id = p.Id, Name = p.Name, Slug = p.Slug, Store = p.Store, StoreId = p.StoreId, Brand = p.Brand,
         Price = p.Price, OldPrice = p.OldPrice, Rating = p.Rating, Reviews = p.Reviews,
         Size = p.Size, Discount = p.Discount, Category = p.Category, Subcategory = p.Subcategory,
         SubSubcategory = p.SubSubcategory, Color = p.Color, Gender = CatalogEnumParsing.GenderToWire(p.Gender), SizeSystem = p.SizeSystem,

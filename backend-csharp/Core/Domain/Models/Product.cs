@@ -31,6 +31,10 @@ public class Product : FullAuditableEntity<int>
     public string Store { get; set; } = "";
     public int StoreId { get; set; }
 
+    // SEO URL slug (/product/{slug}). Yaradılanda addan törədilir, sonra SABİT qalır
+    // (ad dəyişsə də URL qırılmasın). Unikallıq: filtrlənmiş unikal indeks (bax AppDbContext).
+    public string Slug { get; set; } = "";
+
     // Marka (brand) — ölçü dəqiqliyi üçün. AI mühərriki marka əsaslı kəsim davranışı tətbiq edir
     // (məs. Zara → runs small). Mağaza məhsulu seçəndə yazır; boşdursa marka korreksiyası tətbiq olunmur.
     public string Brand { get; set; } = "";

@@ -1,3 +1,4 @@
+using Gardrop.Core.Application.Common.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gardrop.Infrastructure.Persistance.Data;
@@ -66,11 +67,37 @@ public static class DbSeeder
 
         await db.SaveChangesAsync();
 
+        // ── SEO slug backfill: slug-u boş məhsullara addan unikal slug ver (mövcud/köhnə data) ──
+        await BackfillProductSlugsAsync(db);
+
         // Seed explicit Id-lər yazır (Stores 1..7, Products 1..N), amma Id artıq DB identity-dir
         // (bax menfiler 2.3). Identity sequence-i seed-dən sonra max(Id)-ə sinxronlaşdır ki,
         // növbəti avtomatik insert toqquşmasın. Yalnız PostgreSQL.
         if (db.Database.IsNpgsql())
             await SyncIdentitySequencesAsync(db);
+    }
+
+    /// <summary>
+    /// Slug-u boş məhsullara addan unikal SEO slug təyin edir (bir dəfə; idempotent).
+    /// Toqquşmada -2, -3 … əlavə olunur (həm DB-də, həm bu batch daxilində).
+    /// </summary>
+    private static async Task BackfillProductSlugsAsync(AppDbContext db)
+    {
+        var missing = await db.Products.Where(p => p.Slug == "").OrderBy(p => p.Id).ToListAsync();
+        if (missing.Count == 0) return;
+
+        // Mövcud slug-ları yığ (batch daxilində toqquşma qarşısı).
+        var used = new HashSet<string>(await db.Products.Where(p => p.Slug != "").Select(p => p.Slug).ToListAsync());
+        foreach (var p in missing)
+        {
+            var baseSlug = SlugHelper.Generate(p.Name);
+            if (baseSlug.Length == 0) baseSlug = "mehsul";
+            var slug = baseSlug;
+            var i = 2;
+            while (!used.Add(slug)) slug = $"{baseSlug}-{i++}";
+            p.Slug = slug;
+        }
+        await db.SaveChangesAsync();
     }
 
     /// <summary>

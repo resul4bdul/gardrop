@@ -99,6 +99,11 @@ public static class DependencyInjection
             services.AddSingleton<IStorageService, LocalStorageService>();
         }
 
+        // Şəkil optimizasiyası (upload-da WebP sıxma + thumbnail) — stateless, Singleton.
+        services.AddSingleton<IImageProcessor, ImageSharpProcessor>();
+        // Köhnə şəkil backfill (bir-dəfəlik admin əməliyyatı) — DbContext-dən asılı, Scoped.
+        services.AddScoped<IImageBackfillService, ImageBackfillService>();
+
         // ── Domain/Application servisləri (onion: Core interfeysi ← Infrastructure impl) ──
         // DbContext-dən asılı olanlar Scoped; saf (stateless) məntiq Singleton.
         services.AddScoped<INotificationService, NotificationService>();

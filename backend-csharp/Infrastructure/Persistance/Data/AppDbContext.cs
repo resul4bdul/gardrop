@@ -151,6 +151,9 @@ public class AppDbContext : DbContext, IAppDbContext
                 v => CatalogEnumParsing.GenderToWire(v),
                 v => CatalogEnumParsing.ParseGender(v)).HasMaxLength(20);
             e.Property(p => p.ApprovalStatus).HasConversion<string>().HasMaxLength(20);
+            // SEO slug — filtrlənmiş unikal indeks (boş slug-ları və soft-delete-ləri istisna).
+            e.Property(p => p.Slug).HasMaxLength(220);
+            e.HasIndex(p => p.Slug).IsUnique().HasFilter("\"Slug\" <> '' AND \"IsDeleted\" = false");
             e.Property(p => p.Sizes).HasConversion(listConverter).Metadata.SetValueComparer(listComparer);
             e.Property(p => p.Tags).HasConversion(listConverter).Metadata.SetValueComparer(listComparer);
             e.Property(p => p.ImageUrls).HasConversion(listConverter).Metadata.SetValueComparer(listComparer);

@@ -18,7 +18,9 @@ public class UploadController : ControllerBase
     private const long MaxBytes = 15 * 1024 * 1024; // 15 MB (keyfiyyətli mağaza şəkilləri)
 
     private readonly IStorageService _storage;
-    public UploadController(IStorageService storage) => _storage = storage;
+    private readonly IImageProcessor _images;
+    public UploadController(IStorageService storage, IImageProcessor images)
+    { _storage = storage; _images = images; }
 
     // POST /api/upload  (multipart/form-data, sahə adı: file və ya files)
     [HttpPost]
@@ -43,12 +45,24 @@ public class UploadController : ControllerBase
                 return BadRequest(new { error = $"Dəstəklənməyən format: {ext}. Yalnız şəkil (jpg/png/webp/gif)." });
 
             await using var stream = f.OpenReadStream();
-            // Boş bucket → düz /uploads/ kökü (mövcud URL formatı qorunur).
-            var loc = await _storage.UploadAsync(stream, f.FileName, f.ContentType, bucket: "", ct);
-            // Local üçün NİSBİ yol saxlanır ("/uploads/..") — origin-neutral: eyni domeyndən
-            // (LAN, cloudflared tunnel, prod) işləyir. Mütləq "http://localhost:3001/.." host
-            // bağlardı → telefonda/tuneldə şəkil görünməzdi. S3/MinIO onsuz da mütləq URL qaytarır.
-            urls.Add(loc);
+
+            if (_images.CanProcess(f.ContentType, f.FileName))
+            {
+                // Sıxma + WebP + thumbnail: X.webp (tam) və X_thumb.webp (kart üçün) cüt saxlanır.
+                // Frontend thumb URL-i konvensiya ilə çıxarır (.webp → _thumb.webp).
+                var pi = await _images.ProcessAsync(stream, ct);
+                var id = Guid.NewGuid().ToString("N");
+                var loc = await _storage.UploadRawAsync(pi.Full, $"{id}{pi.Extension}", pi.ContentType, ct);
+                await _storage.UploadRawAsync(pi.Thumb, $"{id}_thumb{pi.Extension}", pi.ContentType, ct);
+                urls.Add(loc);
+            }
+            else
+            {
+                // İşlənməyən (məs. animasiyalı GIF) — olduğu kimi. Boş bucket → düz /uploads/ kökü.
+                // Local üçün NİSBİ yol ("/uploads/..") — origin-neutral (LAN/tunnel/prod). S3 mütləq URL.
+                var loc = await _storage.UploadAsync(stream, f.FileName, f.ContentType, bucket: "", ct);
+                urls.Add(loc);
+            }
         }
 
         return Ok(new { urls, url = urls.FirstOrDefault() });

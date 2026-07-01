@@ -6,7 +6,7 @@ import type { CommonProps, NavFn, Product, Store } from '../types';
 
 const { useState, useEffect } = React;
 
-const CatalogPage = ({ nav, favs, togFav, addCart, cart, user, activeCat, activeStore, products, categories, catalogLoading }: CommonProps & { activeCat: string; activeStore: Store | string | null }) => {
+const CatalogPage = ({ nav, favs, togFav, addCart, cart, user, activeCat, activeStore, products, stores, categories, catalogLoading }: CommonProps & { activeCat: string; activeStore: Store | string | null }) => {
   const [cat, setCat] = useState(activeCat||'Kişi');
   const [sort, setSort] = useState('newest');
   const [subcats, setSubcats] = useState<string[]>([]);
@@ -24,6 +24,10 @@ const CatalogPage = ({ nav, favs, togFav, addCart, cart, user, activeCat, active
   const isAll     = cat==='Hamısı';
   const isSpecial = isAll || ['Yeni gələnlər','Endirimlər','Sənə uyğun'].includes(cat);
   const isStore   = !!activeStore;
+  // activeStore obyekt (tam profil) və ya köhnə ad string ola bilər — hər ikisini normalizə et
+  const storeObj  = (typeof activeStore==='object' && activeStore) ? activeStore
+    : (typeof activeStore==='string' ? (stores.find(s=>s.name===activeStore) || null) : null);
+  const storeName = storeObj ? storeObj.name : (typeof activeStore==='string' ? activeStore : '');
   const catObj   = categories.find(c=>c.name===cat);
   const subs     = catObj?.subcategories || ['T-shirt','Köynək','Polo','Hoodie','Şalvar','Paltar'];
   // Seçilmiş alt-kateqoriyaların alt-alt-kateqoriyaları (3-cü səviyyə)
@@ -33,7 +37,7 @@ const CatalogPage = ({ nav, favs, togFav, addCart, cart, user, activeCat, active
   const crumb = isAll ? 'Bütün məhsullar' : cat;
 
   // Bu kateqoriya/mağaza üçün baza dəst — facet (rəng/ölçü/material) seçimləri bundan çıxır
-  const baseSet = isStore ? products.filter(p=>p.store===activeStore)
+  const baseSet = isStore ? products.filter(p=>p.store===storeName)
     : cat==='Endirimlər' ? products.filter(p=>p.discount)
     : cat==='Sənə uyğun' ? products.filter(p=>{
         if(!user) return true;
@@ -73,7 +77,51 @@ const CatalogPage = ({ nav, favs, togFav, addCart, cart, user, activeCat, active
   filtered = [...filtered].sort((a,b)=> sort==='price_asc'?a.price-b.price : sort==='price_desc'?b.price-a.price : sort==='rating'?(b.rating||0)-(a.rating||0) : b.id-a.id );
   const cp = { nav, favs, togFav, addCart, cart, user };
   const sortLabels: Record<string, string> = { newest:'Ən yenilər', price_asc:'Ucuzdan bahaya', price_desc:'Bahadan ucuza', rating:'Ən yüksək reytinq' };
-  const heading = isStore ? `${activeStore} mağazası` : isAll ? 'Bütün məhsullar' : isSpecial ? cat : `${cat} üçün geyimlər`;
+  const heading = isStore ? storeName : isAll ? 'Bütün məhsullar' : isSpecial ? cat : `${cat} üçün geyimlər`;
+
+  // Mağaza profil başlığı (banner + logo + reyting + haqqında + sosial + çatdırılma/qaytarma)
+  const socials = storeObj ? ([
+    ['Instagram', storeObj.instagram && (storeObj.instagram.startsWith('http')?storeObj.instagram:`https://instagram.com/${storeObj.instagram.replace(/^@/,'')}`)],
+    ['Facebook',  storeObj.facebook  && (storeObj.facebook.startsWith('http')?storeObj.facebook:`https://facebook.com/${storeObj.facebook}`)],
+    ['TikTok',    storeObj.tiktok    && (storeObj.tiktok.startsWith('http')?storeObj.tiktok:`https://tiktok.com/@${storeObj.tiktok.replace(/^@/,'')}`)],
+    ['WhatsApp',  storeObj.whatsapp  && `https://wa.me/${storeObj.whatsapp.replace(/[^\d]/g,'')}`],
+  ] as [string, string|false|undefined][]).filter(([,u])=>!!u) : [];
+  const storeHeader = isStore ? (
+    <div className="mb-6">
+      {storeObj?.banner && (
+        <div className="h-32 sm:h-44 w-full rounded-sheet2 overflow-hidden bg-bg3 mb-4">
+          <img src={resolveImg(storeObj.banner) || undefined} alt={storeName} className="w-full h-full object-cover" loading="lazy" onError={e=>{e.currentTarget.style.display='none';}}/>
+        </div>
+      )}
+      <div className="flex items-start gap-4">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-bg3 flex items-center justify-center shrink-0 overflow-hidden border border-bdr">
+          {storeObj?.logo ? <img src={resolveImg(storeObj.logo) || undefined} alt={storeName} className="w-full h-full object-cover" loading="lazy" onError={e=>{e.currentTarget.style.display='none';}}/> : <span className="text-2xl font-bold text-t2">{storeName[0]}</span>}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl md:text-3xl font-bold text-brand">{storeName}</h1>
+          <div className="flex items-center gap-2 mt-1 flex-wrap text-sm">
+            <span className="flex items-center gap-1"><Ic.Star className="w-4 h-4 text-yellow-400"/><span className="font-semibold text-brand">{storeObj?.rating ?? 0}</span><span className="text-t3">({storeObj?.reviews ?? 0} rəy)</span></span>
+            {storeObj?.city && <><span className="text-bdr-s">•</span><span className="text-t2">{storeObj.city}</span></>}
+            <span className="text-bdr-s">•</span><span className="text-t2">{baseSet.length} məhsul</span>
+            {storeObj?.established ? <><span className="text-bdr-s">•</span><span className="text-t2">{storeObj.established}-dən</span></> : null}
+          </div>
+          {storeObj?.about && <p className="text-sm text-t2 leading-relaxed mt-2 max-w-2xl">{storeObj.about}</p>}
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            {socials.map(([label,url])=>(
+              <a key={label} href={url as string} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-t2 border border-bdr rounded-full px-3 py-1 hover:border-brand hover:text-brand transition-colors">{label}</a>
+            ))}
+            {(storeObj?.prepDays!=null || storeObj?.returnDays!=null) && (
+              <span className="text-xs text-t3">
+                {storeObj?.prepDays!=null && `Hazırlıq: ${storeObj.prepDays} gün`}
+                {storeObj?.prepDays!=null && storeObj?.returnDays!=null && ' · '}
+                {storeObj?.returnDays!=null && `Qaytarma: ${storeObj.returnDays} gün`}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : null;
 
   // Filtr paneli (həm masaüstü yan panel, həm mobil açılan panel üçün)
   const isDiscountPage = cat==='Endirimlər';
@@ -173,7 +221,7 @@ const CatalogPage = ({ nav, favs, togFav, addCart, cart, user, activeCat, active
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-brand mb-5">{heading}</h1>
+        {isStore ? storeHeader : <h1 className="text-2xl md:text-3xl font-bold text-brand mb-5">{heading}</h1>}
         {isAll && (
           <div className="flex gap-2 overflow-x-auto pb-3 mb-3 scrollbar-hide">
             {leftCats.map(c=>(
@@ -269,8 +317,8 @@ export const StoresPage = ({ nav, stores, products }: { nav: NavFn; stores: Stor
         {stores.length===0 ? <p className="text-t2 text-sm py-16 text-center">Mağaza tapılmadı</p> : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {stores.map(s=>(
-              <button key={s.id} className="bg-white rounded-card border border-bdr shadow-xs p-5 text-left hover:shadow-card-h hover:-translate-y-0.5 transition-all flex items-center gap-4" onClick={()=>nav('catalog',{store:s.name})}>
-                <div className="w-14 h-14 bg-bg3 rounded-full flex items-center justify-center shrink-0 overflow-hidden">{s.logo ? <img src={resolveImg(s.logo) || undefined} alt={s.name} className="w-full h-full object-cover" onError={e=>{e.currentTarget.style.display='none';}}/> : <span className="text-xl font-bold text-t2">{s.name[0]}</span>}</div>
+              <button key={s.id} className="bg-white rounded-card border border-bdr shadow-xs p-5 text-left hover:shadow-card-h hover:-translate-y-0.5 transition-all flex items-center gap-4" onClick={()=>nav('catalog',{store:s})}>
+                <div className="w-14 h-14 bg-bg3 rounded-full flex items-center justify-center shrink-0 overflow-hidden">{s.logo ? <img src={resolveImg(s.logo) || undefined} alt={s.name} className="w-full h-full object-cover" loading="lazy" onError={e=>{e.currentTarget.style.display='none';}}/> : <span className="text-xl font-bold text-t2">{s.name[0]}</span>}</div>
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-brand truncate">{s.name}</p>
                   <div className="flex items-center gap-1 mt-0.5"><Ic.Star className="w-3.5 h-3.5 text-yellow-400"/><span className="text-sm text-t2">{s.rating}</span><span className="text-xs text-t3">({s.reviews})</span></div>

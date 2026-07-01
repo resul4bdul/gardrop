@@ -112,6 +112,10 @@ builder.Services.AddRateLimiter(o =>
     // "search" — kataloq/axtarış scraping qarşısı (IP üzrə, 40/dəq).
     o.AddPolicy("search", ctx => RateLimitPartition.GetFixedWindowLimiter(Ip(ctx),
         _ => new FixedWindowRateLimiterOptions { Window = TimeSpan.FromMinutes(1), PermitLimit = 40, QueueLimit = 0 }));
+
+    // "coupon" — kupon kodu brute-force/enumeration qarşısı (IP üzrə, 8/dəq).
+    o.AddPolicy("coupon", ctx => RateLimitPartition.GetFixedWindowLimiter(Ip(ctx),
+        _ => new FixedWindowRateLimiterOptions { Window = TimeSpan.FromMinutes(1), PermitLimit = 8, QueueLimit = 0 }));
 });
 
 // ── JWT Authentication ──

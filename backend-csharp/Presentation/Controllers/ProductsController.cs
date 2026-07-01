@@ -29,4 +29,12 @@ public class ProductsController : ControllerBase
         var product = await _catalog.GetAsync(id, ct);
         return product is null ? NotFound(new { error = "Məhsul tapılmadı" }) : Ok(product);
     }
+
+    // GET /api/products/slug/{slug} — SEO məhsul səhifəsi (Next.js SSR)
+    [HttpGet("slug/{slug}")]
+    public async Task<IActionResult> BySlug(string slug, CancellationToken ct)
+    {
+        var product = await _catalog.GetBySlugAsync(slug, ct);
+        return product is null ? NotFound(new { error = "Məhsul tapılmadı" }) : Ok(product);
+    }
 }

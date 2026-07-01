@@ -54,20 +54,28 @@ public class ProductCatalogService : IProductCatalogService
         return new ProductListResponse(total, products.ToViews());
     }
 
-    public async Task<ProductDetailDto?> GetAsync(int id, CancellationToken ct = default)
+    public Task<ProductDetailDto?> GetAsync(int id, CancellationToken ct = default) =>
+        DetailAsync(p => p.Id == id, ct);
+
+    public Task<ProductDetailDto?> GetBySlugAsync(string slug, CancellationToken ct = default) =>
+        string.IsNullOrWhiteSpace(slug) ? Task.FromResult<ProductDetailDto?>(null)
+                                        : DetailAsync(p => p.Slug == slug, ct);
+
+    // Ortaq detal qurucusu (id və ya slug üzrə) — baxış sayğacı + related + mağaza logo/slug.
+    private async Task<ProductDetailDto?> DetailAsync(Func<Product, bool> match, CancellationToken ct)
     {
         var list = await _db.Products.AsNoTracking().Where(p => p.ApprovalStatus == ApprovalStatus.Approved).ToListAsync(ct);
-        var product = list.FirstOrDefault(p => p.Id == id);
+        var product = list.FirstOrDefault(match);
         if (product is null) return null;
 
         // Baxış sayğacını artır (atomik, tək sorğu — entity yükləmədən).
-        await _db.Products.Where(p => p.Id == id)
+        await _db.Products.Where(p => p.Id == product.Id)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.Views, p => p.Views + 1), ct);
 
         var related = list.Where(p => p.Id != product.Id && p.Category == product.Category).Take(4).ToList();
-        var storeLogo = await _db.Stores.AsNoTracking()
-            .Where(s => s.Id == product.StoreId).Select(s => s.Logo).FirstOrDefaultAsync(ct) ?? "";
+        var store = await _db.Stores.AsNoTracking()
+            .Where(s => s.Id == product.StoreId).Select(s => new { s.Logo, s.Url }).FirstOrDefaultAsync(ct);
 
-        return ProductDetailDto.From(product, storeLogo, related.ToViews());
+        return ProductDetailDto.From(product, store?.Logo ?? "", related.ToViews(), store?.Url ?? "");
     }
 }

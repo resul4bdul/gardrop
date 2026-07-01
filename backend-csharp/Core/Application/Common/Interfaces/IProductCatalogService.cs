@@ -11,4 +11,7 @@ public interface IProductCatalogService
 
     /// <summary>Məhsul detalı + əlaqəli məhsullar. Tapılmazsa null.</summary>
     Task<ProductDetailDto?> GetAsync(int id, CancellationToken ct = default);
+
+    /// <summary>SEO slug ilə məhsul detalı (/product/{slug}). Tapılmazsa null.</summary>
+    Task<ProductDetailDto?> GetBySlugAsync(string slug, CancellationToken ct = default);
 }

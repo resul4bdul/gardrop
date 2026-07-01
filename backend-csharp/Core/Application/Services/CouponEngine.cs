@@ -7,10 +7,13 @@ public class CouponEngine : ICouponService
     /// <summary>Kuponu səbət cəminə görə qiymətləndirir və endirim məbləğini (₼) qaytarır.</summary>
     public CouponResult Evaluate(Coupon? c, decimal subtotal)
     {
-        if (c is null) return new(false, "Kupon tapılmadı", 0);
-        if (!c.Active) return new(false, "Kupon deaktivdir", 0);
-        if (c.ExpiresAt is { } exp && exp < DateTime.UtcNow) return new(false, "Kuponun vaxtı bitib", 0);
-        if (c.MaxUses is { } max && c.Used >= max) return new(false, "Kupon istifadə limitinə çatıb", 0);
+        // Təhlükəsizlik: mövcudluğu sızdıran hallar (yoxdur/deaktiv/vaxtı bitib/limit dolub)
+        // eyni generik mesaj qaytarır ki, kupon kodu enumeration edilə bilməsin.
+        const string invalid = "Kupon kodu etibarsızdır";
+        if (c is null) return new(false, invalid, 0);
+        if (!c.Active) return new(false, invalid, 0);
+        if (c.ExpiresAt is { } exp && exp < DateTime.UtcNow) return new(false, invalid, 0);
+        if (c.MaxUses is { } max && c.Used >= max) return new(false, invalid, 0);
         if (subtotal < c.MinOrder)
             return new(false, $"Bu kupon {c.MinOrder:0.##} ₼-dən yuxarı sifarişlərdə işləyir", 0);
 

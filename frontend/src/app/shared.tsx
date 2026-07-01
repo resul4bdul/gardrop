@@ -237,18 +237,28 @@ export const Ic: Record<string, (p: any) => React.ReactElement> = {
 export const resolveImg = (s?: string | null): string | null | undefined =>
   s ? s.replace(/^https?:\/\/[^/]+(\/uploads\/)/i, '$1') : s;
 
+// Kart/siyahı üçün kiçik thumbnail URL-i: backend cütü X.webp + X_thumb.webp saxlayır.
+// Yalnız .webp (yeni işlənmiş şəkillər) üçün; köhnə/xarici URL-lər olduğu kimi qalır.
+export const thumbUrl = (s?: string | null): string | null | undefined =>
+  s && /\.webp$/i.test(s) ? s.replace(/\.webp$/i, '_thumb.webp') : s;
+
 // CMS: /api/content xəritəsindən bir açarı təhlükəsiz JSON-parse et (xəta/boş → fallback).
 export function parseContent<T>(content: Record<string,string> | undefined, key: string, fallback: T): T {
   try { const v = content?.[key]; if(!v) return fallback; const p = JSON.parse(v); return (p ?? fallback) as T; }
   catch { return fallback; }
 }
 
-export const Img = ({ className="", src, alt="" }: { className?: string; src?: string | null; alt?: string }) => {
+// thumb=true → kiçik _thumb.webp yüklə (kataloq kartları). Thumb tapılmasa (köhnə şəkil)
+// tam şəklə düş, o da alınmasa placeholder.
+export const Img = ({ className="", src, alt="", thumb=false }: { className?: string; src?: string | null; alt?: string; thumb?: boolean }) => {
+  const full = resolveImg(src);
+  const initial = thumb ? (thumbUrl(full) ?? full) : full;
+  const [cur, setCur] = useState(initial);
   const [err, setErr] = useState(false);
-  src = resolveImg(src);
-  useEffect(()=>{ setErr(false); }, [src]);
-  if (src && !err)
-    return <img src={src} alt={alt} loading="lazy" onError={()=>setErr(true)}
+  useEffect(()=>{ setCur(initial); setErr(false); }, [initial]);
+  const onError = ()=>{ if (cur !== full && full) setCur(full); else setErr(true); };
+  if (cur && !err)
+    return <img src={cur} alt={alt} loading="lazy" onError={onError}
       className={`object-cover bg-bg2 ${className}`}/>;
   return (
     <div className={`bg-bg2 flex items-center justify-center overflow-hidden ${className}`}>
@@ -320,7 +330,7 @@ export const ProductCard = ({ p, nav, favs, togFav, user }: CardProps) => {
   return (
     <div className="bg-white rounded-card overflow-hidden cursor-pointer group border border-bdr shadow-xs hover:shadow-card-h hover:-translate-y-1 transition-all duration-200" onClick={()=>nav('product',{product:p})}>
       <div className="relative">
-        <Img className="w-full aspect-[3/4]" src={p.imageUrls && p.imageUrls[0]} alt={p.name}/>
+        <Img className="w-full aspect-[3/4]" src={p.imageUrls && p.imageUrls[0]} alt={p.name} thumb/>
         {rec && rec.hasMeasurements && (rec.fits===false
           ? <div className="absolute top-2 left-2 bg-sale text-white text-[10px] font-bold px-2 py-0.5 rounded-badge">Uyğun deyil</div>
           : <div className="absolute top-2 left-2"><SizeBadge size={rec.size}/></div>)}

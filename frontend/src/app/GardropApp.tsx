@@ -203,7 +203,7 @@ const App = () => {
     const _st={ selProd:data.product??selProd, activeCat:data.category??activeCat,
                 activeStore:data.category?null:(('store' in data)?(data.store??null):activeStore),
                 searchQuery:data.query??searchQuery, profileTab:data.tab??profileTab };
-    try{ window.history.pushState({gd:true}, '', pageToHash(pg,_st)); }catch{}
+    try{ window.history.pushState({gd:true}, '', pageToPath(pg,_st)); }catch{}
     setPage(pg);
     if(data.product)  setSelProd(data.product);
     if(data.category){ setActiveCat(data.category); setActiveStore(null); }
@@ -230,7 +230,7 @@ const App = () => {
   /* ── İlk yüklənmədə URL hash-ini oxu (deep-link / refresh) ── */
   useEffect(()=>{
     if(new URLSearchParams(location.search).get('reset')) return; // şifrə bərpa axını üstündür
-    const r=parseHash();
+    const r=parsePath();
     if(r.category){ setActiveCat(r.category); setActiveStore(null); }
     if(r.query!=null) setSearchQuery(r.query);
     if(r.tab) setProfileTab(r.tab);
@@ -350,27 +350,27 @@ const App = () => {
   );
 };
 
-/* ── Hash-əsaslı routing: page state ↔ URL hash (statik servis üçün refresh-təhlükəsiz) ── */
-function pageToHash(pg: string, st: { selProd?: Product | null; activeCat?: string; activeStore?: Store | string | null; searchQuery?: string; profileTab?: string }){
+/* ── History-əsaslı routing: page state ↔ real URL yolu (# YOX). SPA fallback:
+   dev-də Vite index.html verir; prod-da statik server bütün yolları index.html-ə rewrite etməli. ── */
+function pageToPath(pg: string, st: { selProd?: Product | null; activeCat?: string; activeStore?: Store | string | null; searchQuery?: string; profileTab?: string }){
   switch(pg){
-    case 'home':    return '#/';
-    case 'product': return st.selProd?.id!=null ? `#/product/${st.selProd.id}` : '#/product';
+    case 'home':    return '/';
+    case 'product': return st.selProd?.id!=null ? `/product/${st.selProd.id}` : '/product';
     case 'catalog': {
       const storeId = (typeof st.activeStore==='object' && st.activeStore) ? st.activeStore.id : null;
-      if(storeId!=null) return `#/store/${storeId}`;
-      return (st.activeCat && st.activeCat!=='Hamısı') ? `#/catalog/${encodeURIComponent(st.activeCat)}` : '#/catalog';
+      if(storeId!=null) return `/store/${storeId}`;
+      return (st.activeCat && st.activeCat!=='Hamısı') ? `/catalog/${encodeURIComponent(st.activeCat)}` : '/catalog';
     }
-    case 'search':  return `#/search?q=${encodeURIComponent(st.searchQuery||'')}`;
-    case 'profile': return (st.profileTab && st.profileTab!=='sifarisler') ? `#/profile/${st.profileTab}` : '#/profile';
-    default:        return `#/${pg}`;
+    case 'search':  return `/search?q=${encodeURIComponent(st.searchQuery||'')}`;
+    case 'profile': return (st.profileTab && st.profileTab!=='sifarisler') ? `/profile/${st.profileTab}` : '/profile';
+    default:        return `/${pg}`;
   }
 }
-interface ParsedHash { page: string; category?: string; storeId?: string; prodId?: string; query?: string; tab?: string }
-function parseHash(): ParsedHash{
-  const raw=(location.hash||'').replace(/^#\/?/,'');
-  const [path,query]=raw.split('?');
+interface ParsedPath { page: string; category?: string; storeId?: string; prodId?: string; query?: string; tab?: string }
+function parsePath(): ParsedPath{
+  const path=(location.pathname||'/').replace(/^\/+/,'');
   const segs=path.split('/').filter(Boolean);
-  const q=new URLSearchParams(query||'');
+  const q=new URLSearchParams(location.search||'');
   if(!segs.length) return {page:'home'};
   switch(segs[0]){
     case 'catalog': return {page:'catalog', category: segs[1]?decodeURIComponent(segs[1]):'Hamısı'};

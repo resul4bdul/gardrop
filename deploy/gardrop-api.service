@@ -1,0 +1,22 @@
+[Unit]
+Description=Gardrop .NET API
+After=network.target postgresql.service
+
+[Service]
+WorkingDirectory=/var/www/gardrop/backend-csharp/Presentation
+ExecStart=/usr/bin/dotnet /var/www/gardrop/backend-csharp/Presentation/bin/Release/net10.0/Gardrop.Presentation.dll
+Restart=always
+RestartSec=5
+SyslogIdentifier=gardrop-api
+User=www-data
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://127.0.0.1:3001
+# Sirlər env-dən (bax appsettings.example.json):
+Environment=ConnectionStrings__Default=Host=localhost;Port=5432;Database=gardrop;Username=gardrop;Password=CHANGE_ME
+Environment=Jwt__Secret=CHANGE_ME
+# Reset/verify email linkləri bu domenlə qurulur:
+Environment=Email__AppBaseUrl=https://gardrop.az
+# Şəkil sıxma prod-da S3/MinIO işlədirsə: Storage__Provider=S3 + S3 açarları
+
+[Install]
+WantedBy=multi-user.target

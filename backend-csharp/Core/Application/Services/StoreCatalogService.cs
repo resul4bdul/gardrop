@@ -17,4 +17,11 @@ public class StoreCatalogService : IStoreCatalogService
         var s = await _db.Stores.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
         return s is null ? null : StoreView.From(s);
     }
+
+    public async Task<StoreView?> GetByUrlAsync(string url, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return null;
+        var s = await _db.Stores.AsNoTracking().FirstOrDefaultAsync(x => x.Url == url, ct);
+        return s is null ? null : StoreView.From(s);
+    }
 }

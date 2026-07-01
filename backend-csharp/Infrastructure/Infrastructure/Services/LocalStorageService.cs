@@ -22,6 +22,15 @@ public class LocalStorageService : IStorageService
         return string.IsNullOrWhiteSpace(bucket) ? $"/uploads/{safe}" : $"/uploads/{bucket}/{safe}";
     }
 
+    public async Task<string> UploadRawAsync(byte[] bytes, string objectName, string contentType, CancellationToken ct = default)
+    {
+        Directory.CreateDirectory(_uploadsRoot);
+        var safe = Path.GetFileName(objectName); // yol keçidi (../) qarşısı
+        var path = Path.Combine(_uploadsRoot, safe);
+        await File.WriteAllBytesAsync(path, bytes, ct);
+        return $"/uploads/{safe}";
+    }
+
     public Task DeleteAsync(string url, CancellationToken ct = default)
     {
         // url: "/uploads/<bucket>/<file>" → kökə nisbi.

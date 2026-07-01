@@ -65,7 +65,7 @@ public class EmailSender : IEmailSender
     public Task SendResetAsync(string to, string token)
     {
         // Bərpa linki burada qurulur ki, AppBaseUrl Application qatına sızmasın (bax menfiler 1.1).
-        var link = $"{_opt.AppBaseUrl.TrimEnd('/')}/gardrop.html?reset={token}";
+        var link = $"{_opt.AppBaseUrl.TrimEnd('/')}/?reset={token}";
         return SendResetLinkAsync(to, link);
     }
 

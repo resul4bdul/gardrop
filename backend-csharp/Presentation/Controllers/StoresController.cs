@@ -22,4 +22,12 @@ public class StoresController : ControllerBase
         var store = await _stores.GetAsync(id, ct);
         return store is null ? NotFound(new { error = "Mağaza tapılmadı" }) : Ok(store);
     }
+
+    // GET /api/stores/by-url/{slug} — SEO mağaza səhifəsi (Next.js SSR)
+    [HttpGet("by-url/{slug}")]
+    public async Task<IActionResult> ByUrl(string slug, CancellationToken ct)
+    {
+        var store = await _stores.GetByUrlAsync(slug, ct);
+        return store is null ? NotFound(new { error = "Mağaza tapılmadı" }) : Ok(store);
+    }
 }

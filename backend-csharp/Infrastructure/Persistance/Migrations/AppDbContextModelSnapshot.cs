@@ -669,6 +669,11 @@ namespace Gardrop.Infrastructure.Persistance.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(220)
+                        .HasColumnType("character varying(220)");
+
                     b.Property<int>("Stock")
                         .HasColumnType("integer");
 
@@ -720,6 +725,10 @@ namespace Gardrop.Infrastructure.Persistance.Migrations
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SearchBlob"), "gin");
                     NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("SearchBlob"), new[] { "gin_trgm_ops" });
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasFilter("\"Slug\" <> '' AND \"IsDeleted\" = false");
 
                     b.ToTable("Products", "catalog");
                 });

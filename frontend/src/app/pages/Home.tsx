@@ -141,8 +141,8 @@ const HomePage = ({ nav, favs, togFav, addCart, cart, user, products, stores, ca
           <SectionHead title="Top mağazalar" onAll={()=>nav('stores')}/>
           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
             {stores.map(s=>(
-              <button key={s.id} className="shrink-0 bg-white rounded-card p-4 text-center w-36 shadow-xs border border-bdr hover:shadow-card-h hover:-translate-y-0.5 transition-all" onClick={()=>nav('catalog',{store:s.name})}>
-                <div className="w-14 h-14 bg-bg3 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">{s.logo ? <img src={resolveImg(s.logo) || undefined} alt={s.name} className="w-full h-full object-cover" onError={e=>{e.currentTarget.style.display='none';}}/> : <span className="text-lg font-bold text-t2">{s.name[0]}</span>}</div>
+              <button key={s.id} className="shrink-0 bg-white rounded-card p-4 text-center w-36 shadow-xs border border-bdr hover:shadow-card-h hover:-translate-y-0.5 transition-all" onClick={()=>nav('catalog',{store:s})}>
+                <div className="w-14 h-14 bg-bg3 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">{s.logo ? <img src={resolveImg(s.logo) || undefined} alt={s.name} className="w-full h-full object-cover" loading="lazy" onError={e=>{e.currentTarget.style.display='none';}}/> : <span className="text-lg font-bold text-t2">{s.name[0]}</span>}</div>
                 <p className="font-semibold text-sm text-brand truncate">{s.name}</p>
                 <div className="flex items-center justify-center gap-1 mt-1"><Ic.Star className="w-3 h-3 text-yellow-400"/><span className="text-xs text-t2">{s.rating}</span><span className="text-xs text-t3">({s.reviews})</span></div>
                 <p className="text-xs text-t3 mt-0.5">{s.products} məhsul</p>

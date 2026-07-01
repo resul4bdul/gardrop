@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Gardrop.Core.Application.Common.Interfaces;
 
 namespace Gardrop.Presentation.Controllers;
@@ -13,6 +14,8 @@ public class CheckoutController : ControllerBase
     public CheckoutController(ICheckoutService checkout) => _checkout = checkout;
 
     // POST /api/coupons/validate  { code, subtotal }
+    // Rate-limit "coupon" (IP üzrə 8/dəq) — kod brute-force/enumeration qarşısı.
+    [EnableRateLimiting("coupon")]
     [HttpPost("coupons/validate")]
     public async Task<IActionResult> ValidateCoupon([FromBody] CouponCheckDto dto, CancellationToken ct)
     {

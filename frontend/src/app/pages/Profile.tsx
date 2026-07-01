@@ -465,7 +465,7 @@ export const GuestAccount = ({ nav, lang, setLang }: { nav: NavFn; lang: string;
 
 const ProfilePage = ({ nav, user, token, doLogout, refreshUser, initialTab, reorder, prefs, updatePref, lang, setLang }: { nav: NavFn; user: User; token: string | null; doLogout: () => void; refreshUser: () => void | Promise<unknown>; initialTab?: string; reorder: (o: Order) => void; prefs: Prefs; updatePref: (k: string, v: boolean) => void; lang: string; setLang: (l: string) => void }) => {
   const [tab,setTab]=useState(initialTab||'sifarisler');
-  const selectTab=(k: string)=>{ setTab(k); try{ window.history.replaceState(window.history.state,'',k==='sifarisler'?'#/profile':`#/profile/${k}`); }catch{} };
+  const selectTab=(k: string)=>{ setTab(k); try{ window.history.replaceState(window.history.state,'',k==='sifarisler'?'/profile':`/profile/${k}`); }catch{} };
   const [orders,setOrders]=useState<Order[]>([]); const [loadingOrders,setLoadingOrders]=useState(false);
   const [expanded,setExpanded]=useState<number | null>(null);
   const [addresses,setAddresses]=useState<Address[]>(user?.addresses||[]);

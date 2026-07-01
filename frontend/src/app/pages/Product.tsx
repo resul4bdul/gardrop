@@ -83,7 +83,7 @@ export const SizeGuideModal = ({ isShoe, gender='Kişi', custom=null, onClose }:
 };
 
 /* ══════════════════════════════════════ PRODUCT DETAIL ══════════════════════════════════════ */
-const ProductDetailPage = ({ p, nav, favs, togFav, addCart, removeFromCart, cart, user, token, products, showAuthPopup }: CommonProps & { p: Product | null; token: string | null }) => {
+const ProductDetailPage = ({ p, nav, favs, togFav, addCart, removeFromCart, cart, user, token, products, stores, showAuthPopup }: CommonProps & { p: Product | null; token: string | null }) => {
   const [sz, setSz] = useState(p?.size||'L');
   const [imgIdx, setImgIdx] = useState(0);
   const trackRef = useRef<HTMLDivElement | null>(null);  // mobil karusel scroll konteyneri
@@ -106,6 +106,8 @@ const ProductDetailPage = ({ p, nav, favs, togFav, addCart, removeFromCart, cart
   const isFav = p && favs.includes(p.id);
   const inCart = p && cart.some(c=>c.id===p.id);
   const cp = { nav, favs, togFav, addCart, cart, user };
+  // Mağaza adına klik → tam profil obyekti ilə mağaza səhifəsi (tapılmasa ad string fallback)
+  const goStore = () => { if(!p?.store) return; const s = stores.find(x=>x.name===p.store); nav('catalog',{store: s || p.store}); };
 
   useEffect(()=>{
     if(!p) return;
@@ -221,7 +223,7 @@ const ProductDetailPage = ({ p, nav, favs, togFav, addCart, removeFromCart, cart
 
           {/* Info */}
           <div className="md:w-1/2">
-            <p className="text-[10px] text-t3 uppercase tracking-[0.08em] font-bold mb-1">{p.store}</p>
+            <button onClick={goStore} className="text-[10px] text-t3 uppercase tracking-[0.08em] font-bold mb-1 hover:text-brand transition-colors">{p.store}</button>
             <h1 className="text-2xl md:text-3xl font-bold text-brand mb-2">{p.name}</h1>
             <div className="flex items-center gap-2 mb-4">
               <Ic.Star className="w-4 h-4 text-yellow-400"/><span className="font-semibold text-brand">{p.rating}</span>
@@ -324,7 +326,7 @@ const ProductDetailPage = ({ p, nav, favs, togFav, addCart, removeFromCart, cart
                   <ul className="space-y-1.5 list-disc list-inside">
                     <li><strong>Rəng:</strong> {p.color}</li>
                     <li><strong>Material:</strong> {p.material}</li>
-                    <li><strong>Mağaza:</strong> {p.store}</li>
+                    <li><strong>Mağaza:</strong> <button onClick={goStore} className="text-brand underline hover:text-brand-h transition-colors">{p.store}</button></li>
                   </ul>
                 </div>
               )}
@@ -393,7 +395,7 @@ const ProductDetailPage = ({ p, nav, favs, togFav, addCart, removeFromCart, cart
                       <div className="w-6 h-6 rounded-full bg-bg3 overflow-hidden flex items-center justify-center shrink-0">
                         {p.storeLogo ? <img src={resolveImg(p.storeLogo) || undefined} alt={p.store} className="w-full h-full object-cover" onError={e=>{e.currentTarget.style.display='none';}}/> : <span className="text-[10px] font-bold text-t2">{(p.store||'?')[0]}</span>}
                       </div>
-                      <p className="text-xs font-bold text-accent-t">{p.store} <span className="text-t3 font-normal">cavab verdi</span></p>
+                      <p className="text-xs font-bold text-accent-t"><button onClick={goStore} className="hover:underline">{p.store}</button> <span className="text-t3 font-normal">cavab verdi</span></p>
                     </div>
                     <p className="text-sm text-t2 leading-relaxed">{r.storeReply}</p>
                   </div>

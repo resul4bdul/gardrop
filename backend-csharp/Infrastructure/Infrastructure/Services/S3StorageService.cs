@@ -39,6 +39,24 @@ public class S3StorageService : IStorageService
         return $"{baseUrl}/{key}";
     }
 
+    public async Task<string> UploadRawAsync(byte[] bytes, string objectName, string contentType, CancellationToken ct = default)
+    {
+        var key = $"uploads/{Path.GetFileName(objectName)}";
+        using var ms = new MemoryStream(bytes);
+        await _s3.PutObjectAsync(new PutObjectRequest
+        {
+            BucketName = _opt.Bucket,
+            Key = key,
+            InputStream = ms,
+            ContentType = contentType,
+        }, ct);
+
+        var baseUrl = string.IsNullOrWhiteSpace(_opt.PublicBaseUrl)
+            ? $"{_opt.ServiceUrl.TrimEnd('/')}/{_opt.Bucket}"
+            : _opt.PublicBaseUrl.TrimEnd('/');
+        return $"{baseUrl}/{key}";
+    }
+
     public async Task DeleteAsync(string url, CancellationToken ct = default)
     {
         var key = ExtractKey(url);

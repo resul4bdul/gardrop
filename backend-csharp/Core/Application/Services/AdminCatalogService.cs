@@ -1,4 +1,5 @@
 using Gardrop.Core.Application.Common;
+using Gardrop.Core.Application.Common.Helpers;
 using Gardrop.Core.Application.Common.Interfaces;
 using Gardrop.Core.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +65,7 @@ public class AdminCatalogService : IAdminCatalogService
         if (string.IsNullOrWhiteSpace(dto.Name)) return OpResult.Fail(400, "Məhsul adı mütləqdir");
         var p = new Product();   // Id-ni DB identity verir (bax menfiler 2.3)
         _productWriter.Apply(p, dto);
+        p.Slug = await _db.UniqueProductSlugAsync(p.Name, ct);   // SEO slug (yaradılanda sabitlənir)
         _db.Products.Add(p);
         await _db.SaveChangesAsync(ct);
         _rating.Request();
