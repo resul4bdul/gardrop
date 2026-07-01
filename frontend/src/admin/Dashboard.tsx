@@ -39,7 +39,8 @@ export function Dashboard({ api }: { api: ApiFn; toast: ToastFn }) {
       <div className="space-y-5 max-w-6xl">
         {/* Əsas KPI-lar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatTile label="Ümumi gəlir" value={money(s.revenue)} tone="green" icon={<span className="font-bold">₼</span>} />
+          <StatTile label="Platform gəlir" value={money(s.platformRevenue)} sub={`komissiya ${money(s.commission)} + çatdırılma ${money(s.deliveryRevenue)}`} tone="green" icon={<span className="font-bold">₼</span>} />
+          <StatTile label="Ümumi satış" value={money(s.clothingSales)} sub="ümumi geyim satışı (GMV)" tone="blue" icon={<span className="font-bold">₼</span>} />
           <StatTile label="Sifarişlər" value={fmt(c.orders)} tone="blue" icon={<Ic.orders className="w-[18px] h-[18px]" />} />
           <StatTile label="İstifadəçilər" value={fmt(c.users)} tone="brand" icon={<Ic.users className="w-[18px] h-[18px]" />} />
           <StatTile label="Məhsullar" value={fmt(c.products)} tone="gray" icon={<Ic.products className="w-[18px] h-[18px]" />} />

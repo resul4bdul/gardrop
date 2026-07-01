@@ -25,4 +25,4 @@ button:not(:disabled):active { transform: scale(0.97); }
 .row-h:hover { background: #FAFAFA; }
 table { border-collapse: collapse; }
 input, select, textarea { outline: none; }
-input:focus, select:focus, textarea:focus { border-color: #0A0A0A !important; box-shadow: 0 0 0 3px rgba(10,10,10,0.06); }
+input:focus, select:focus, textarea:focus { border-color: #0B8457 !important; box-shadow: 0 0 0 3px rgba(11,132,87,0.14); }

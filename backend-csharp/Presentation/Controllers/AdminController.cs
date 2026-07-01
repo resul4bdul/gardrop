@@ -29,6 +29,14 @@ public class AdminController : ControllerBase
     [HttpGet("analytics")]
     public async Task<IActionResult> Analytics([FromQuery] int days = 14, CancellationToken ct = default) => Ok(await _analytics.AnalyticsAsync(days, ct));
 
+    // GET /api/admin/stores/{id}/detail — mağaza maliyyə detalı (satış/qazanc/borc + payout)
+    [HttpGet("stores/{id:int}/detail")]
+    public async Task<IActionResult> StoreDetail(int id, CancellationToken ct)
+    {
+        var d = await _analytics.StoreDetailAsync(id, ct);
+        return d is null ? NotFound(new { error = "Mağaza tapılmadı" }) : Ok(d);
+    }
+
     // ── Users ──
     [HttpGet("users")]
     public async Task<IActionResult> Users([FromQuery] string? search, [FromQuery] int? page, [FromQuery] int? pageSize, CancellationToken ct) => Ok(await _users.UsersAsync(search, page, pageSize, ct));

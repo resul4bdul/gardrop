@@ -33,7 +33,7 @@ public class AdminAnalyticsTests
     {
         using var db = TestDb.New();
         await SeedAsync(db);
-        var stats = await new AdminAnalyticsService(db).StatsAsync();
+        var stats = await new AdminAnalyticsService(db, new CommissionService(db)).StatsAsync();
 
         // Ləğv olunmuş sifariş (9 ədəd Köynək) sayılmamalı → Köynək units = 3.
         var top = stats.TopProducts.Single(t => t.Id == 1);
@@ -47,7 +47,7 @@ public class AdminAnalyticsTests
     {
         using var db = TestDb.New();
         await SeedAsync(db);
-        var a = await new AdminAnalyticsService(db).AnalyticsAsync(14);
+        var a = await new AdminAnalyticsService(db, new CommissionService(db)).AnalyticsAsync(14);
 
         Assert.Equal(4, a.TotalUnits);          // 3 + 1 (ləğv xaric)
         Assert.Equal(250m, a.TotalRevenue);     // 150 + 100

@@ -60,10 +60,17 @@ export interface AdminOrder {
 export interface Stats {
   counts: { users: number; products: number; orders: number; stores: number; categories: number; reviews: number; admins: number };
   revenue: number;
+  clothingSales: number; platformRevenue: number; commission: number; deliveryRevenue: number;
   recentOrders: { id: number; orderNo: string; total: number; status: string }[];
   ordersByStatus: Record<string, number>;
   lowStock: { id: number; name: string; store: string; stock: number }[];
   recentReviews?: { id: number; rating: number; productName: string; userName: string; comment?: string; createdAt: string }[];
+}
+
+export interface AdminStoreDetail {
+  id: number; name: string; city: string; ownerEmail: string;
+  salesUnits: number; orderCount: number; gmv: number; commission: number; netOwed: number;
+  totalPaid: number; balance: number; payouts: Payout[];
 }
 
 export interface Analytics {

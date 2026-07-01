@@ -5,4 +5,5 @@ public interface IAdminAnalyticsService
 {
     Task<AdminStats> StatsAsync(CancellationToken ct = default);
     Task<AdminAnalytics> AnalyticsAsync(int days, CancellationToken ct = default);
+    Task<AdminStoreDetail?> StoreDetailAsync(int storeId, CancellationToken ct = default);
 }

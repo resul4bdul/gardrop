@@ -274,7 +274,7 @@ export function NotificationBell({ api }: { api: ApiFn }) {
           <>
             <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
             <div className="absolute right-0 mt-1 w-80 max-h-96 overflow-y-auto bg-white border border-bdr rounded-card shadow-pop z-50 anim-pop">
-              <div className="px-4 py-2.5 border-b border-bdr flex items-center justify-between sticky top-0 bg-white"><span className="font-bold text-sm">Bildirişlər</span>{data.items.length > 0 && <button onClick={markAll} className="text-xs text-blue hover:underline">Hamısını oxu</button>}</div>
+              <div className="px-4 py-2.5 border-b border-bdr sticky top-0 bg-white"><span className="font-bold text-sm">Bildirişlər</span></div>
               {data.items.length === 0 ? <div className="px-4 py-8 text-center text-t3 text-sm">Bildiriş yoxdur</div> : (
                 <div>{data.items.map(n => (
                   <div key={n.id} className={`px-4 py-3 border-b border-bdr last:border-0 ${n.read ? '' : 'bg-bg2/60'}`}>

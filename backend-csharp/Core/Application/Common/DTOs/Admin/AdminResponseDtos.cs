@@ -16,7 +16,15 @@ public record AdminTopProduct(int Id, string Name, int Units, decimal Revenue);
 public record AdminStats(
     AdminStatsCounts Counts, decimal Revenue, Dictionary<string, int> OrdersByStatus,
     List<AdminRecentOrder> RecentOrders, List<AdminLowStockItem> LowStock,
-    List<AdminRecentReview> RecentReviews, List<AdminTopProduct> TopProducts);
+    List<AdminRecentReview> RecentReviews, List<AdminTopProduct> TopProducts,
+    // Platforma gəliri = komissiya + çatdırılma; ClothingSales = ümumi geyim satışı (GMV, brut).
+    decimal ClothingSales, decimal PlatformRevenue, decimal Commission, decimal DeliveryRevenue);
+
+// ── Admin mağaza detalı (maliyyə + payout) ──
+public record AdminStoreDetail(
+    int Id, string Name, string City, string OwnerEmail,
+    int SalesUnits, int OrderCount, decimal Gmv, decimal Commission, decimal NetOwed,
+    decimal TotalPaid, decimal Balance, List<PayoutView> Payouts);
 
 // ── Analitika ──
 public record AdminRevenuePoint(string Day, decimal Revenue, int Orders);

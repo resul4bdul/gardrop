@@ -186,12 +186,7 @@ function App() {
             <span className="text-slate-400">Mağaza</span><Ic.chevR className="w-3.5 h-3.5 text-slate-300" /><span className="font-semibold text-slate-900">{cur?.[1]}</span>
           </div>
           <h1 className="sm:hidden text-lg font-bold text-slate-900">{cur?.[1]}</h1>
-          {/* Global axtarış */}
-          <div className="relative ml-auto hidden lg:block w-64">
-            <Ic.search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input placeholder="Axtar…" className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-sm placeholder:text-slate-400 focus:bg-white" />
-          </div>
-          <div className="flex items-center gap-1 lg:ml-2 ml-auto lg:ml-2">
+          <div className="flex items-center gap-1 ml-auto">
             <NotificationBell api={api} />
             {/* Profil menyusu */}
             <div className="relative">

@@ -62,7 +62,7 @@ function Login({ onLogin }: { onLogin: (token: string, user: Me) => void }) {
     <div className="min-h-screen grid place-items-center p-4 bg-bg2">
       <form onSubmit={step === 'cred' ? submitCred : submitOtp} className="bg-white rounded-sheet2 shadow-pop w-full max-w-sm p-8 anim-pop border border-bdr">
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-12 h-12 rounded-card bg-brand text-accent grid place-items-center font-black text-xl mb-3">G</div>
+          <div className="w-12 h-12 rounded-card bg-blue text-white grid place-items-center font-black text-xl mb-3">G</div>
           <h1 className="font-bold text-xl leading-tight text-brand">Gardrop Admin</h1>
           <p className="text-xs text-t3 mt-0.5">İdarəetmə paneli</p>
         </div>
@@ -159,7 +159,7 @@ function App() {
   const Sidebar = (
     <aside className="w-64 shrink-0 bg-white border-r border-bdr flex flex-col h-full">
       <div className="px-5 h-16 flex items-center gap-2.5 border-b border-bdr">
-        <div className="w-9 h-9 rounded-btn bg-brand text-accent grid place-items-center font-black">G</div>
+        <div className="w-9 h-9 rounded-btn bg-blue text-white grid place-items-center font-black">G</div>
         <div><div className="font-bold leading-tight text-brand">Gardrop</div><div className="text-[11px] text-t3 tracking-wide">ADMIN PANEL</div></div>
       </div>
       <nav className="flex-1 p-3 space-y-0.5 overflow-auto">
@@ -168,8 +168,8 @@ function App() {
           return (
             <button key={n.k} onClick={() => { setPage(n.k); setNavOpen(false); }}
               className={`group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-btn text-sm font-medium text-left transition-colors ${active ? 'bg-bg2 text-brand' : 'text-t2 hover:text-brand hover:bg-bg2/60'}`}>
-              {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r bg-accent-t" />}
-              <I className={`w-[18px] h-[18px] ${active ? 'text-accent-t' : 'text-t3'}`} />{n.label}
+              {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r bg-blue" />}
+              <I className={`w-[18px] h-[18px] ${active ? 'text-blue' : 'text-t3'}`} />{n.label}
             </button>
           );
         })}

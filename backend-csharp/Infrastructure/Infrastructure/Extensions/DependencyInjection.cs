@@ -149,6 +149,12 @@ public static class DependencyInjection
         services.AddSingleton<IProductWriter, ProductWriter>();
         services.AddSingleton<IDeliveryService, DeliveryEngine>();
         services.AddSingleton<ICouponService, CouponEngine>();
+        // Ölçü mühərriki — provider seam + Strategy pattern (bax Sizing/). Static data → singleton.
+        services.AddSingleton<ISizeChartProvider, StaticSizeChartProvider>();
+        services.AddSingleton<IBrandBehaviorProvider, StaticBrandBehaviorProvider>();
+        services.AddSingleton<ISizeRecommenderStrategy, ShoeSizeStrategy>();
+        services.AddSingleton<ISizeRecommenderStrategy, CustomChartSizeStrategy>();
+        services.AddSingleton<ISizeRecommenderStrategy, ClothingSizeStrategy>();
         services.AddSingleton<ISizeRecommender, SizeEngine>();
 
         return services;
