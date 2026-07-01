@@ -131,7 +131,7 @@ export const Spin = ({ cls = 'w-4 h-4' }: { cls?: string }) => <span className={
   type BtnProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'ghost' | 'danger' };
 export const Btn = ({ children, variant = 'primary', className = '', ...p }: BtnProps) => {
     const base = 'inline-flex items-center justify-center gap-1.5 font-medium rounded-btn px-3.5 py-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed';
-    const styles = { primary: 'bg-brand text-white hover:bg-brand-h', ghost: 'bg-white border border-bdr text-brand hover:bg-bg2', danger: 'bg-sale/10 text-sale hover:bg-sale/20' };
+    const styles = { primary: 'bg-blue text-white hover:bg-blue-700', ghost: 'bg-white border border-bdr text-brand hover:bg-bg2', danger: 'bg-sale/10 text-sale hover:bg-sale/20' };
     return <button className={`${base} ${styles[variant]} ${className}`} {...p}>{children}</button>;
   };
 export const Card = ({ children, className = '' }: { children?: React.ReactNode; className?: string }) => <div className={`bg-white border border-bdr rounded-sheet shadow-xs overflow-x-auto ${className}`}>{children}</div>;

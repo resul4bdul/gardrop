@@ -33,6 +33,11 @@ export interface Store {
   lat?: number | null; lng?: number | null; ownerEmail?: string;
 }
 
+export interface Payout {
+  id: number; storeId: number; periodStart: string; periodEnd: string; amount: number;
+  status: string; paidAt?: string | null; method: string; reference: string; note: string; createdAt: string;
+}
+
 export interface Coupon {
   id?: number; code: string; type: string; value: number | string;
   minOrder?: number | string; active?: boolean; expiresAt?: string | null; maxUses?: number | string | null; used?: number;

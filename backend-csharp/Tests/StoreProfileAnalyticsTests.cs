@@ -65,4 +65,22 @@ public class StoreProfileAnalyticsTests
         Assert.Equal(1, a.OrderCount);        // ləğv xaric → bir sifariş
         Assert.Equal(1, a.TopProducts.Single().Id);
     }
+
+    [Fact]
+    public async Task Finance_balance_subtracts_paid_payouts()
+    {
+        using var db = TestDb.New();
+        await SeedAsync(db);   // net = 150 (komissiya yox → faktor 1)
+        db.StorePayouts.Add(new StorePayout { StoreId = StoreId, Amount = 50m, Status = PayoutStatus.Paid, PeriodStart = DateTime.UtcNow.AddDays(-10), PeriodEnd = DateTime.UtcNow });
+        db.StorePayouts.Add(new StorePayout { StoreId = StoreId, Amount = 30m, Status = PayoutStatus.Pending, PeriodStart = DateTime.UtcNow.AddDays(-5), PeriodEnd = DateTime.UtcNow });
+        await db.SaveChangesAsync();
+
+        var r = await new StoreProfileService(db, new FakeRatingQueue(), new CommissionService(db)).FinanceAsync(Owner, StoreId);
+        var fin = Assert.IsType<StoreFinance>(r.Data);
+
+        Assert.Equal(150m, fin.TotalEarnings);
+        Assert.Equal(50m, fin.TotalPaid);          // yalnız "Ödənildi" sayılır
+        Assert.Equal(100m, fin.CurrentBalance);    // 150 − 50
+        Assert.Equal(2, fin.Payouts.Count);
+    }
 }

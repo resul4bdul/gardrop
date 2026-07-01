@@ -3,7 +3,7 @@ import React from "react";
 const { useState, useEffect, useCallback } = React;
 import { Btn, Field, Modal, Confirm, TableSkeleton, EmptyRow, Toolbar, Th, Td, Card, MapPicker, EMPTY_STORE, uploadFilesAdmin, useLive } from "./shared";
 import { MCard, MobileListState } from "../lib/iosUi";
-import type { ApiFn, ToastFn, Store } from "./types";
+import type { ApiFn, ToastFn, Store, Payout } from "./types";
 
 export function Stores({ api, toast }: { api: ApiFn; toast: ToastFn }) {
     const [rows, setRows] = useState<Store[] | null>(null);
@@ -87,6 +87,29 @@ export function StoreEdit({ store, api, toast, onClose, onSave }: { store: Store
     const [defPct, setDefPct] = useState<number | string>('');
     const [catRows, setCatRows] = useState<ComRow[]>([]);
     const [comBusy, setComBusy] = useState(false);
+    // Ödənişlər (payout/settlement) — yalnız mövcud mağaza üçün
+    const EMPTY_PF = { periodStart: '', periodEnd: '', amount: '' as number | string, status: 'Gözləyir', method: '', reference: '', note: '' };
+    const [payouts, setPayouts] = useState<Payout[]>([]);
+    const [pf, setPf] = useState({ ...EMPTY_PF });
+    const [poBusy, setPoBusy] = useState(false);
+    const loadPayouts = useCallback(() => { if (!store.id) return; api<Payout[]>(`/api/admin/stores/${store.id}/payouts`).then(setPayouts).catch(() => {}); }, [store.id, api]);
+    useEffect(() => { loadPayouts(); }, [loadPayouts]);
+    const addPayout = async () => {
+      if (!store.id) return;
+      if (pf.amount === '' || Number(pf.amount) <= 0) { toast('Məbləğ 0-dan böyük olmalıdır', 'error'); return; }
+      setPoBusy(true);
+      try {
+        await api(`/api/admin/stores/${store.id}/payouts`, { method: 'POST', body: JSON.stringify({
+          PeriodStart: pf.periodStart || null, PeriodEnd: pf.periodEnd || null, Amount: Number(pf.amount),
+          Status: pf.status, Method: pf.method, Reference: pf.reference, Note: pf.note }) });
+        toast('Ödəniş əlavə edildi'); setPf({ ...EMPTY_PF }); loadPayouts();
+      } catch (e) { toast((e as Error).message, 'error'); }
+      setPoBusy(false);
+    };
+    const delPayout = async (id: number) => {
+      try { await api(`/api/admin/stores/${store.id}/payouts/${id}`, { method: 'DELETE' }); toast('Silindi'); loadPayouts(); }
+      catch (e) { toast((e as Error).message, 'error'); }
+    };
     useEffect(() => {
       if (!store.id) return;
       api<{ category: string; percent: number }[]>(`/api/admin/stores/${store.id}/commissions`).then((r) => {
@@ -166,6 +189,54 @@ export function StoreEdit({ store, api, toast, onClose, onSave }: { store: Store
               ))}
             </div>
             <div className="flex justify-end mt-3"><Btn variant="ghost" onClick={saveCommissions} disabled={comBusy}>{comBusy ? 'Saxlanılır…' : 'Komissiyaları saxla'}</Btn></div>
+          </div>
+        )}
+
+        {store.id && (
+          <div className="mt-4 border-t border-bdr pt-4">
+            <h4 className="font-bold text-sm text-brand mb-1">Ödənişlər (mağazaya köçürmə)</h4>
+            <p className="text-xs text-t3 mb-3">Platformanın satıcıya köçürdüyü net məbləğ. Satıcı bunu "Ödəniş tarixçəsi"ndə görür; balans = ümumi net − ödənilmiş.</p>
+
+            {payouts.length > 0 && (
+              <div className="overflow-x-auto mb-3">
+                <table className="w-full min-w-[520px] text-sm">
+                  <thead><tr className="text-left text-t3 border-b border-bdr">
+                    <th className="py-1.5 font-medium">Dövr</th><th className="py-1.5 font-medium text-right">Məbləğ</th>
+                    <th className="py-1.5 font-medium">Status</th><th className="py-1.5 font-medium">Referans</th><th></th>
+                  </tr></thead>
+                  <tbody>
+                    {payouts.map((p) => (
+                      <tr key={p.id} className="border-b border-bdr last:border-0">
+                        <td className="py-1.5 text-t2">{(p.periodStart || '').slice(0, 10)} – {(p.periodEnd || '').slice(0, 10)}</td>
+                        <td className="py-1.5 text-right font-semibold">{p.amount} ₼</td>
+                        <td className="py-1.5"><span className={p.status === 'Ödənildi' ? 'text-green' : 'text-t2'}>{p.status}</span></td>
+                        <td className="py-1.5 text-t2 break-all">{p.reference || '—'}</td>
+                        <td className="py-1.5 text-right"><button type="button" onClick={() => delPayout(p.id)} className="text-sale text-lg px-1 leading-none">×</button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-2">
+              <label className="block"><span className="block text-xs font-semibold text-t2 mb-1">Dövr başlanğıcı</span>
+                <input type="date" value={pf.periodStart} onChange={(e) => setPf({ ...pf, periodStart: e.target.value })} className="w-full bg-white border border-bdr rounded-btn px-3 py-2 text-sm" /></label>
+              <label className="block"><span className="block text-xs font-semibold text-t2 mb-1">Dövr sonu</span>
+                <input type="date" value={pf.periodEnd} onChange={(e) => setPf({ ...pf, periodEnd: e.target.value })} className="w-full bg-white border border-bdr rounded-btn px-3 py-2 text-sm" /></label>
+              <label className="block"><span className="block text-xs font-semibold text-t2 mb-1">Məbləğ (₼, net)</span>
+                <input type="number" min="0" step="0.01" value={pf.amount} onChange={(e) => setPf({ ...pf, amount: e.target.value === '' ? '' : Number(e.target.value) })} placeholder="məs. 250.00" className="w-full bg-white border border-bdr rounded-btn px-3 py-2 text-sm" /></label>
+              <label className="block"><span className="block text-xs font-semibold text-t2 mb-1">Status</span>
+                <select value={pf.status} onChange={(e) => setPf({ ...pf, status: e.target.value })} className="w-full bg-white border border-bdr rounded-btn px-3 py-2 text-sm">
+                  <option value="Gözləyir">Gözləyir</option><option value="Ödənildi">Ödənildi</option></select></label>
+              <label className="block"><span className="block text-xs font-semibold text-t2 mb-1">Üsul (bank/IBAN)</span>
+                <input value={pf.method} onChange={(e) => setPf({ ...pf, method: e.target.value })} placeholder="məs. Kapital Bank" className="w-full bg-white border border-bdr rounded-btn px-3 py-2 text-sm" /></label>
+              <label className="block"><span className="block text-xs font-semibold text-t2 mb-1">Referans</span>
+                <input value={pf.reference} onChange={(e) => setPf({ ...pf, reference: e.target.value })} placeholder="transfer №" className="w-full bg-white border border-bdr rounded-btn px-3 py-2 text-sm" /></label>
+              <div className="col-span-2"><label className="block"><span className="block text-xs font-semibold text-t2 mb-1">Qeyd</span>
+                <input value={pf.note} onChange={(e) => setPf({ ...pf, note: e.target.value })} className="w-full bg-white border border-bdr rounded-btn px-3 py-2 text-sm" /></label></div>
+            </div>
+            <div className="flex justify-end mt-3"><Btn variant="ghost" onClick={addPayout} disabled={poBusy}>{poBusy ? 'Əlavə edilir…' : '＋ Ödəniş əlavə et'}</Btn></div>
           </div>
         )}
 
