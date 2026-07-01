@@ -473,6 +473,7 @@ const ProfilePage = ({ nav, user, token, doLogout, refreshUser, initialTab, reor
   const [prof,setProf]=useState({ad:user?.ad||'',soyad:user?.soyad||'',telefon:user?.telefon||''});
   const [profBusy,setProfBusy]=useState(false); const [profSaved,setProfSaved]=useState(false);
   const [cancelId,setCancelId]=useState<number | null>(null); const [cancelMsg,setCancelMsg]=useState(''); const [cancelReason,setCancelReason]=useState('');
+  const [disputeId,setDisputeId]=useState<number | null>(null); const [disputeMsg,setDisputeMsg]=useState(''); const [disputeReason,setDisputeReason]=useState(''); const [disputed,setDisputed]=useState<Set<number>>(new Set());
 
   const sc: Record<string,string>={'Çatdırıldı':'text-accent-t','Hazırlanır':'text-yellow-600','Hazırlandı':'text-teal-700','Yolda':'text-blue-600','İptal':'text-sale'};
   const scBg: Record<string,string>={'Çatdırıldı':'#69EA9B','Hazırlanır':'#FEF3C7','Hazırlandı':'#CCFBF1','Yolda':'#DBEAFE','İptal':'#FEE2E2'};
@@ -514,6 +515,17 @@ const ProfilePage = ({ nav, user, token, doLogout, refreshUser, initialTab, reor
       if(d.status){ setOrders(os=>os.map(o=>o.id===id?{...o,status:d.status,cancelReason:d.cancelReason,cancelledBy:d.cancelledBy,cancelledAt:d.cancelledAt}:o)); setCancelId(null); setCancelReason(''); }
       else { setCancelMsg(d.error||'Xəta baş verdi'); }
     }catch{ setCancelMsg('Serverlə əlaqə yoxdur'); }
+  };
+
+  const openDispute = async (id: number) => {
+    setDisputeMsg('');
+    if(disputeReason.trim().length<5){ setDisputeMsg('Problemi ətraflı yazın (ən az 5 simvol)'); return; }
+    try{
+      const r=await fetch(`${API}/api/orders/${id}/dispute`,{method:'POST',headers:bearer(token),body:JSON.stringify({reason:disputeReason.trim()})});
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok){ setDisputeMsg(d.error||'Göndərilmədi'); return; }
+      setDisputed(s=>new Set(s).add(id)); setDisputeId(null); setDisputeReason('');
+    }catch{ setDisputeMsg('Serverlə əlaqə yoxdur'); }
   };
 
   const tabs=[['sifarisler','📦','Sifarişlərim'],['olculer','📏','Ölçülərim'],['adresler','📍','Ünvanlar'],['ayarlar','⚙️','Tənzimləmələr']];
@@ -603,6 +615,21 @@ const ProfilePage = ({ nav, user, token, doLogout, refreshUser, initialTab, reor
                       <button className="w-full text-xs font-medium py-2 rounded-btn border transition-colors hover:bg-[#FFF8F8]" style={{color:'#E53E3E',borderColor:'#FECACA'}} onClick={()=>{setCancelId(o.id);setCancelMsg('');setCancelReason('');}}>Sifarişi ləğv et</button>
                     ))}
                     {o.status==='Yolda' && <p className="text-xs text-t3 text-center pt-1">Ləğv etmək üçün dəstəklə əlaqə saxlayın</p>}
+                    {o.status==='Çatdırıldı' && (disputed.has(o.id) ? (
+                      <p className="text-xs text-t3 text-center pt-1">Şikayətiniz qeydə alındı — admin araşdırır.</p>
+                    ) : disputeId===o.id ? (
+                      <div className="bg-bg2 rounded-card p-3 space-y-2 anim-fade">
+                        <p className="text-xs font-semibold text-brand">Problemi bildirin (defekt/yanlış məhsul):</p>
+                        <textarea value={disputeReason} onChange={e=>setDisputeReason(e.target.value)} rows={2} placeholder="Məs: məhsul defektli gəldi, ölçü yanlışdır..." className="w-full bg-white border border-bdr rounded-btn px-3 py-2 text-xs resize-none focus:border-brand transition-colors"/>
+                        <div className="flex items-center gap-2">
+                          <button className="text-xs font-semibold text-t2 px-2.5 py-1.5 rounded-btn hover:text-brand transition-colors" onClick={()=>{setDisputeId(null);setDisputeMsg('');setDisputeReason('');}}>Vaz keç</button>
+                          <button className="flex-1 text-xs font-semibold text-white px-3 py-1.5 rounded-btn active:scale-95 transition-transform disabled:opacity-50 bg-brand" disabled={disputeReason.trim().length<5} onClick={()=>openDispute(o.id)}>Şikayəti göndər</button>
+                        </div>
+                        {disputeMsg && <p className="text-xs" style={{color:'#E53E3E'}}>{disputeMsg}</p>}
+                      </div>
+                    ) : (
+                      <button className="w-full text-xs font-medium py-2 rounded-btn border border-bdr text-t2 hover:border-bdr-s hover:text-brand transition-colors" onClick={()=>{setDisputeId(o.id);setDisputeMsg('');setDisputeReason('');}}>Problem bildir</button>
+                    ))}
                   </div>
                 </div>
               ))}

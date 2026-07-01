@@ -11,8 +11,9 @@ public class StoreOwnerProductService : StoreOwnerServiceBase, IStoreOwnerProduc
     private readonly IRatingRecomputeQueue _rating;
     private readonly INotificationService _notify;
     private readonly IProductWriter _productWriter;
-    public StoreOwnerProductService(IAppDbContext db, IRatingRecomputeQueue rating, INotificationService notify, IProductWriter productWriter)
-        : base(db) { _rating = rating; _notify = notify; _productWriter = productWriter; }
+    private readonly IActivityLogService _activity;
+    public StoreOwnerProductService(IAppDbContext db, IRatingRecomputeQueue rating, INotificationService notify, IProductWriter productWriter, IActivityLogService activity)
+        : base(db) { _rating = rating; _notify = notify; _productWriter = productWriter; _activity = activity; }
 
     public async Task<OpResult> ProductsAsync(long userId, int storeId, string? search, CancellationToken ct = default)
     {
@@ -45,6 +46,8 @@ public class StoreOwnerProductService : StoreOwnerServiceBase, IStoreOwnerProduc
             _notify.Notify(userId, "info", "Məhsul yükləndi",
                 $"\"{p.Name}\" məhsulunuz yükləndi və admin təsdiqini gözləyir. Təsdiqlənənə qədər saytda görünməyəcək.");
         await _db.SaveChangesAsync(ct);
+        _activity.Log(userId, s.Name, "product.create", "product", p.Id.ToString(), $"«{p.Name}» yükləndi (qiymət {p.Price} ₼)");
+        await _db.SaveChangesAsync(ct);
         _rating.Request();
         return OpResult.Created(p);
     }
@@ -56,6 +59,7 @@ public class StoreOwnerProductService : StoreOwnerServiceBase, IStoreOwnerProduc
         var p = await _db.Products.FirstOrDefaultAsync(x => x.Id == productId && x.StoreId == storeId, ct);
         if (p is null) return OpResult.Fail(404, "Məhsul tapılmadı");
 
+        var oldPrice = p.Price;
         _productWriter.Apply(p, dto);
         p.StoreId = storeId; p.Store = s.Name;   // başqa mağazaya köçürməyə icazə yoxdur
         p.ApprovalStatus = ApprovalStatus.Pending;  // redaktə sonrası yenidən təsdiqə düşür
@@ -64,6 +68,8 @@ public class StoreOwnerProductService : StoreOwnerServiceBase, IStoreOwnerProduc
         if (!p.IsDraft)
             _notify.Notify(userId, "info", "Məhsul yeniləndi",
                 $"\"{p.Name}\" məhsulunda dəyişiklik yenidən admin təsdiqini gözləyir.");
+        var priceNote = oldPrice != p.Price ? $"qiymət {oldPrice} → {p.Price} ₼" : $"qiymət {p.Price} ₼";
+        _activity.Log(userId, s.Name, "product.update", "product", p.Id.ToString(), $"«{p.Name}» yeniləndi ({priceNote})");
         await _db.SaveChangesAsync(ct);
         _rating.Request();
         return OpResult.Ok(p);

@@ -18,7 +18,8 @@ public class OrderOps : IOrderStatusService
 
     // Mağaza sahibinin təyin edə biləcəyi statuslar: Hazırlanır / Hazırlandı / Kuryerə verildi (Yolda).
     // "Çatdırıldı", "İptal", "Qaytarıldı" yalnız sistem/admin tərəfindən.
-    private static readonly string[] _storeAllowed = { OrderStatus.Preparing, OrderStatus.Prepared, OrderStatus.OnTheWay };
+    // Live Status BİR-YÖNLÜ: mağaza yalnız irəli gedə bilər (Hazırlandı → Yolda). Geri (Hazırlanır-a) yoxdur.
+    private static readonly string[] _storeAllowed = { OrderStatus.Prepared, OrderStatus.OnTheWay };
     public IReadOnlyList<string> StoreAllowedStatuses => _storeAllowed;
 
     /// <summary>Sifariş statusunu dəyişir: zaman damğaları + stok azalt/qaytar (idempotent).</summary>

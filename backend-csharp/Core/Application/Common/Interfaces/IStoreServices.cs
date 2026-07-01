@@ -30,6 +30,7 @@ public interface IStoreOwnerOrderService
 {
     Task<OpResult> OrdersAsync(long userId, int storeId, string? status, CancellationToken ct = default);
     Task<OpResult> UpdateOrderStatusAsync(long userId, int storeId, long orderId, AdminOrderStatusDto dto, CancellationToken ct = default);
+    Task<OpResult> RequestCourierAsync(long userId, int storeId, long orderId, CancellationToken ct = default);
 }
 
 /// <summary>Satıcı paneli — rəy idarəsi.</summary>

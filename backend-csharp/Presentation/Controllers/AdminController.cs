@@ -16,11 +16,26 @@ public class AdminController : ControllerBase
     private readonly IAdminOrderService _orders;
     private readonly IAdminAnalyticsService _analytics;
     private readonly IAdminReviewService _reviews;
+    private readonly IDisputeService _disputes;
+    private readonly IActivityLogService _activity;
     public AdminController(IAdminUserService users, IAdminCatalogService catalog, IAdminOrderService orders,
-        IAdminAnalyticsService analytics, IAdminReviewService reviews)
-    { _users = users; _catalog = catalog; _orders = orders; _analytics = analytics; _reviews = reviews; }
+        IAdminAnalyticsService analytics, IAdminReviewService reviews, IDisputeService disputes, IActivityLogService activity)
+    { _users = users; _catalog = catalog; _orders = orders; _analytics = analytics; _reviews = reviews; _disputes = disputes; _activity = activity; }
 
     private IActionResult Map(OpResult r) => r.ToActionResult();
+    private long Uid => User.GetUserId()!.Value;
+
+    // ── Münaqişələr (dispute & refund) ──
+    [HttpGet("disputes")]
+    public async Task<IActionResult> Disputes([FromQuery] string? status, CancellationToken ct) => Ok(await _disputes.ListAsync(status, ct));
+
+    [HttpPost("disputes/{id:long}/resolve")]
+    public async Task<IActionResult> ResolveDispute(long id, [FromBody] DisputeResolveDto dto, CancellationToken ct) =>
+        Map(await _disputes.ResolveAsync(Uid, id, dto, ct));
+
+    // ── Aktivlik jurnalı ──
+    [HttpGet("activity")]
+    public async Task<IActionResult> Activity([FromQuery] int limit = 50, CancellationToken ct = default) => Ok(await _activity.RecentAsync(limit, ct));
 
     // ── Dashboard ──
     [HttpGet("stats")]

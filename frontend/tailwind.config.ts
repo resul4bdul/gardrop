@@ -3,6 +3,7 @@ import type { Config } from "tailwindcss";
 // gardrop.html-dəki tailwind.config ilə birə-bir eyni (CDN config → build config).
 export default {
   content: ["./*.html", "./src/**/*.{ts,tsx}"],
+  darkMode: "class",
   theme: {
     extend: {
       fontFamily: {

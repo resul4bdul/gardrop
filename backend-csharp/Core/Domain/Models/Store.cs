@@ -58,4 +58,7 @@ public class Store : FullAuditableEntity<int>
 
     // Mağaza paneli (satıcı) girişi — bu mağazaya sahib istifadəçi (Faza 2).
     public long? OwnerUserId { get; set; }
+
+    // Münaqişə həllində admin ödənişi dondura bilər — dondurulmuş mağazaya payout yaradıla bilməz.
+    public bool PayoutFrozen { get; set; }
 }

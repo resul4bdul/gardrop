@@ -10,9 +10,54 @@ import { downloadCsv, csvStamp, csvDate, csvBool, itemsStr } from "../lib/csv";
 
 const PER = 10;
 const STATUS_OPTS: [string, string][] = [['', 'Hamısı'], ['Hazırlanır', 'Hazırlanır'], ['Hazırlandı', 'Hazırlandı'], ['Yolda', 'Kuryerə verildi'], ['Çatdırıldı', 'Çatdırıldı'], ['İptal', 'Ləğv edildi']];
-// Satıcının seçə biləcəyi statuslar
-const STORE_STATUS: [string, string][] = [['Hazırlanır', 'Hazırlanır'], ['Hazırlandı', 'Hazırlandı'], ['Yolda', 'Kuryerə verildi']];
+// Satıcının seçə biləcəyi statuslar — Live Status BİR-YÖNLÜ (geri dönüş yoxdur).
+const STORE_STATUS: [string, string][] = [['Hazırlandı', 'Hazırlandı'], ['Yolda', 'Kuryerə verildi']];
 const CAN_ACT = ['Hazırlanır', 'Hazırlandı'];
+
+// Qaimə çapı — sifariş datasından təmiz A5 qaimə açıb çap dialoqu göstərir (backend lazım deyil).
+const esc = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+function printInvoice(o: Order, storeName: string) {
+  const a = o.deliveryAddress || {};
+  const rows = (o.myItems || []).map((it) => `<tr>
+    <td>${esc(it.name)}</td>
+    <td>${esc([it.selectedSize && `Ölçü ${it.selectedSize}`, it.color].filter(Boolean).join(' / ') || '—')}</td>
+    <td class="c">${it.qty}</td>
+    <td class="r">${money(it.price || 0)}</td>
+    <td class="r">${money((it.price || 0) * (it.qty || 1))}</td></tr>`).join('');
+  const html = `<!doctype html><html lang="az"><head><meta charset="utf-8"><title>Qaimə ${esc(o.orderNo)}</title>
+  <style>
+    *{box-sizing:border-box} body{font:13px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;color:#0f172a;margin:0;padding:32px;max-width:760px}
+    .top{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0f172a;padding-bottom:16px;margin-bottom:20px}
+    .brand{font-size:20px;font-weight:800} .muted{color:#64748b} h1{font-size:15px;margin:0 0 4px} .meta{text-align:right;font-size:12px}
+    .grid{display:flex;gap:40px;margin:18px 0}
+    table{width:100%;border-collapse:collapse;margin-top:8px} th,td{padding:8px 10px;border-bottom:1px solid #e2e8f0;text-align:left}
+    th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#64748b} .c{text-align:center} .r{text-align:right}
+    .tot{display:flex;justify-content:flex-end;margin-top:14px} .tot table{width:auto;min-width:240px} .tot td{border:0;padding:4px 10px}
+    .grand{font-weight:800;font-size:15px;border-top:2px solid #0f172a!important}
+    .foot{margin-top:32px;font-size:11px;color:#94a3b8;text-align:center;border-top:1px solid #e2e8f0;padding-top:12px}
+    @media print{body{padding:0}}
+  </style></head><body>
+  <div class="top">
+    <div><div class="brand">${esc(storeName)}</div><div class="muted">Gardrop marketplace</div></div>
+    <div class="meta"><h1>QAİMƏ</h1><div>№ ${esc(o.orderNo)}</div><div class="muted">${esc(date(o.createdAt))}</div></div>
+  </div>
+  <div class="grid">
+    <div><div class="muted">Müştəri</div><b>${esc(a.ad || o.userName || '—')}</b>
+      ${a.telefon ? `<div>${esc(a.telefon)}</div>` : ''}
+      <div class="muted">${esc([a.sehir, a.unvan].filter(Boolean).join(', ') || o.userEmail || '')}</div></div>
+    <div><div class="muted">Ödəniş</div><b>${esc(o.paymentMethod || '—')}</b>
+      <div class="muted">Çatdırılma: ${esc(o.deliveryType || 'Standart')}</div></div>
+  </div>
+  <table><thead><tr><th>Məhsul</th><th>Variant</th><th class="c">Say</th><th class="r">Qiymət</th><th class="r">Cəm</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+  <div class="tot"><table><tr class="grand"><td>Yekun</td><td class="r">${money(o.mySubtotal)}</td></tr></table></div>
+  <div class="foot">Bu sənəd Gardrop sistemi tərəfindən yaradılıb · ${esc(o.orderNo)}</div>
+  </body></html>`;
+  const w = window.open('', '_blank', 'width=820,height=920');
+  if (!w) return;
+  w.document.write(html); w.document.close(); w.focus();
+  w.onload = () => w.print();
+}
 
 export function Orders({ api, toast, store }: { api: ApiFn; toast: ToastFn; store: Store }) {
   const [rows, setRows] = useState<Order[] | null>(null);
@@ -32,6 +77,12 @@ export function Orders({ api, toast, store }: { api: ApiFn; toast: ToastFn; stor
       toast('Status yeniləndi'); setView(v => v && v.id === o.id ? { ...v, ...r, status: (r as { status?: string }).status || s } : v); load(true);
     } catch (e) { toast((e as Error).message, 'error'); }
   };
+
+  const callCourier = async (o: Order) => {
+    try { await api(`/api/store/${store.id}/orders/${o.id}/courier`, { method: 'POST' }); toast('Kuryer çağırıldı — dispatch xəbərdar edildi', 'success'); }
+    catch (e) { toast((e as Error).message, 'error'); }
+  };
+  const courierReady = (o: Order) => o.status === 'Hazırlandı' || o.status === 'Yolda';
 
   const filtered = useMemo(() => {
     let r = rows || [];
@@ -81,7 +132,13 @@ export function Orders({ api, toast, store }: { api: ApiFn; toast: ToastFn; stor
                         <Td className="text-slate-500">{o.paymentMethod || '—'}</Td>
                         <Td className="text-slate-500 whitespace-nowrap">{date(o.createdAt)}</Td>
                         <Td>{o.myPrepared && CAN_ACT.includes(o.status) ? <Badge color="green" dot>Hazır</Badge> : <Badge color={STATUS_COLOR[o.status] || 'slate'} dot>{statusLabel(o.status)}</Badge>}</Td>
-                        <Td className="text-right"><Button variant="secondary" size="sm" onClick={() => setView(o)}>Bax</Button></Td>
+                        <Td className="text-right whitespace-nowrap">
+                          <div className="inline-flex gap-1.5">
+                            <Button variant="secondary" size="sm" onClick={() => printInvoice(o, store.name)}>Çap</Button>
+                            {courierReady(o) && <Button variant="secondary" size="sm" onClick={() => callCourier(o)}>Kuryer</Button>}
+                            <Button variant="secondary" size="sm" onClick={() => setView(o)}>Bax</Button>
+                          </div>
+                        </Td>
                       </tr>
                     ))}
                   </tbody>
@@ -91,13 +148,14 @@ export function Orders({ api, toast, store }: { api: ApiFn; toast: ToastFn; stor
             </>)}
       </Card>
 
-      {view && <OrderDetail order={view} onClose={() => setView(null)} onStatus={setOrderStatus} />}
+      {view && <OrderDetail order={view} onClose={() => setView(null)} onStatus={setOrderStatus}
+        onPrint={() => printInvoice(view, store.name)} onCourier={() => callCourier(view)} courierReady={courierReady(view)} />}
     </div>
   );
 }
 
 // ───────────── Sifariş detalı (sheet) ─────────────
-function OrderDetail({ order: o, onClose, onStatus }: { order: Order; onClose: () => void; onStatus: (o: Order, s: string) => void }) {
+function OrderDetail({ order: o, onClose, onStatus, onPrint, onCourier, courierReady }: { order: Order; onClose: () => void; onStatus: (o: Order, s: string) => void; onPrint: () => void; onCourier: () => void; courierReady: boolean }) {
   const addr = o.deliveryAddress || {};
   const canAct = CAN_ACT.includes(o.status);
   const steps: [string, string, string | null | undefined][] = [
@@ -180,6 +238,16 @@ function OrderDetail({ order: o, onClose, onStatus }: { order: Order; onClose: (
             <ExpressTimer since={o.createdAt} /> ərzində hazırlamasanız sifariş avtomatik ləğv olunacaq.
           </div>
         )}
+
+        {/* Sürətli əməliyyatlar */}
+        <section>
+          <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Sürətli əməliyyatlar</h4>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" size="sm" icon={<Ic.external className="w-4 h-4" />} onClick={onPrint}>Qaiməni çap et</Button>
+            <Button variant="secondary" size="sm" disabled={!courierReady} onClick={onCourier}>Kuryeri çağır</Button>
+          </div>
+          {!courierReady && <p className="text-xs text-slate-400 mt-1.5">Kuryer yalnız sifariş «Hazırlandı» olduqda çağırıla bilər.</p>}
+        </section>
 
         {/* Status dəyiş */}
         <section>

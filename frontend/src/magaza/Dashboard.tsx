@@ -39,6 +39,19 @@ export function Dashboard({ api, store }: { api: ApiFn; store: Store }) {
 
   return (
     <div className="space-y-5 max-w-6xl">
+      {/* Bugünkü satış — hero (panelə girən kimi ilk görünən; komissiya çıxılmış xalis) */}
+      <div className="rounded-2xl bg-emerald-600 text-white p-5 sm:p-6 shadow-sm flex items-end justify-between gap-4">
+        <div>
+          <div className="text-emerald-50/90 text-sm font-medium">Bugünkü satış</div>
+          <div className="text-3xl sm:text-4xl font-bold tracking-tight mt-1">{money(k.todaySales)}</div>
+          <div className="text-emerald-50/80 text-xs mt-1.5">Komissiya çıxılmış xalis məbləğ · bu gün {k.todayOrders} sifariş</div>
+        </div>
+        <div className="text-right hidden sm:block">
+          <div className="text-emerald-50/80 text-xs">Bu ay</div>
+          <div className="text-xl font-semibold">{money(k.monthSales)}</div>
+        </div>
+      </div>
+
       {/* KPI */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard label="Bugünkü satış" value={money(k.todaySales)} />

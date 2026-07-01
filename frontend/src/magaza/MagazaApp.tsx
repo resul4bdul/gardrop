@@ -18,6 +18,13 @@ import StoreProfile from "./Profile";
 
 const { useState, useEffect, useCallback, useRef } = React;
 
+// Qaranlıq/işıqlı rejim keçidi — html.dark class + localStorage.
+function ThemeToggle() {
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
+  const toggle = () => { const n = !dark; setDark(n); document.documentElement.classList.toggle("dark", n); try { localStorage.setItem("gardrop_theme", n ? "dark" : "light"); } catch { /* ignore */ } };
+  return <button onClick={toggle} title={dark ? "İşıqlı rejim" : "Qaranlıq rejim"} aria-label="Tema" className="w-10 h-10 rounded-xl hover:bg-slate-100 flex items-center justify-center text-lg">{dark ? "☀️" : "🌙"}</button>;
+}
+
 // ───────────────────────── Login ─────────────────────────
 function Login({ onLogin }: { onLogin: (token: string, stores: Store[]) => void }) {
   const [email, setEmail] = useState(''); const [pw, setPw] = useState('');
@@ -187,6 +194,7 @@ function App() {
           </div>
           <h1 className="sm:hidden text-lg font-bold text-slate-900">{cur?.[1]}</h1>
           <div className="flex items-center gap-1 ml-auto">
+            <ThemeToggle />
             <NotificationBell api={api} />
             {/* Profil menyusu */}
             <div className="relative">

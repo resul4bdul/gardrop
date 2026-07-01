@@ -26,3 +26,32 @@ table { border-collapse: collapse; }
 input, select, textarea { outline: none; }
 input:focus, select:focus, textarea:focus { border-color: #0B8457 !important; box-shadow: 0 0 0 3px rgba(11,132,87,0.14); }
 .leaflet-container { font: inherit; }
+
+/* ===== Dark Mode (class-based; JSX toxunulmur — səthi utility class-ları remap edilir) ===== */
+html.dark { color-scheme: dark; }
+html.dark body { background: #0b0f17; color: #e5e9f0; }
+.dark .bg-white { background-color: #131a24 !important; }
+.dark .bg-slate-50 { background-color: #1a222e !important; }
+.dark .bg-slate-100 { background-color: #222c39 !important; }
+.dark .bg-slate-200 { background-color: #2a3542 !important; }
+.dark .bg-slate-300 { background-color: #33404f !important; }
+.dark .text-slate-900 { color: #e5e9f0 !important; }
+.dark .text-slate-800 { color: #dbe1ea !important; }
+.dark .text-slate-700 { color: #c4ccd8 !important; }
+.dark .text-slate-600 { color: #aab4c2 !important; }
+.dark .text-slate-500 { color: #8b95a4 !important; }
+.dark .text-slate-400 { color: #6f7987 !important; }
+.dark .border-slate-100 { border-color: #232d39 !important; }
+.dark .border-slate-200 { border-color: #2a3542 !important; }
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #232d39 !important; }
+.dark .divide-slate-50 > :not([hidden]) ~ :not([hidden]) { border-color: #1a222e !important; }
+.dark input, .dark textarea, .dark select { background-color: #131a24 !important; color: #e5e9f0 !important; }
+.dark input::placeholder, .dark textarea::placeholder { color: #5c6675 !important; }
+/* açıq ton fonlar (badge/icon) → tünd tint */
+.dark .bg-emerald-50 { background-color: rgba(11,132,87,0.18) !important; }
+.dark .bg-amber-50 { background-color: rgba(180,120,20,0.18) !important; }
+.dark .bg-red-50 { background-color: rgba(200,60,60,0.16) !important; }
+.dark .bg-violet-50 { background-color: rgba(120,90,200,0.18) !important; }
+.dark .skel { background: linear-gradient(90deg,#1a222e 25%,#222c39 37%,#1a222e 63%); background-size: 800px 100%; }
+.dark .shadow-sm, .dark .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,0.5) !important; }
+.dark .row-h:hover { background: #1a222e; }

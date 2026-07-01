@@ -20,8 +20,10 @@ public class StorePayoutService : IStorePayoutService
 
     public async Task<OpResult> CreateAsync(AdminPayoutDto dto, CancellationToken ct = default)
     {
-        if (!await _db.Stores.AnyAsync(s => s.Id == dto.StoreId, ct))
-            return OpResult.Fail(404, "Mağaza tapılmadı");
+        var store = await _db.Stores.AsNoTracking().Where(s => s.Id == dto.StoreId)
+            .Select(s => new { s.PayoutFrozen }).FirstOrDefaultAsync(ct);
+        if (store is null) return OpResult.Fail(404, "Mağaza tapılmadı");
+        if (store.PayoutFrozen) return OpResult.Fail(409, "Mağaza ödənişi dondurulub (münaqişə) — əvvəlcə dondurmanı açın");
         if (dto.Amount is not > 0)
             return OpResult.Fail(400, "Məbləğ 0-dan böyük olmalıdır");
 

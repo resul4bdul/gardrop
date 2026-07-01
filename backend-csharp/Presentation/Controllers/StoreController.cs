@@ -66,6 +66,11 @@ public class StoreController : ControllerBase
     public async Task<IActionResult> UpdateOrderStatus(int id, long oid, [FromBody] AdminOrderStatusDto dto, CancellationToken ct) =>
         Map(await _orders.UpdateOrderStatusAsync(Uid, id, oid, dto, ct));
 
+    // POST /api/store/{id}/orders/{oid}/courier — kuryeri çağır (dispatch bildirişi)
+    [HttpPost("{id:int}/orders/{oid:long}/courier")]
+    public async Task<IActionResult> RequestCourier(int id, long oid, CancellationToken ct) =>
+        Map(await _orders.RequestCourierAsync(Uid, id, oid, ct));
+
     // ── Rəylər ──
     [HttpGet("{id:int}/reviews")]
     public async Task<IActionResult> Reviews(int id, CancellationToken ct) => Map(await _reviews.ReviewsAsync(Uid, id, ct));

@@ -29,6 +29,8 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<SiteContent> SiteContents => Set<SiteContent>();
     public DbSet<StoreCommission> StoreCommissions => Set<StoreCommission>();
     public DbSet<StorePayout> StorePayouts => Set<StorePayout>();
+    public DbSet<Dispute> Disputes => Set<Dispute>();
+    public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -51,6 +53,8 @@ public class AppDbContext : DbContext, IAppDbContext
         b.Entity<SiteContent>(e => { e.ToTable("SiteContents", "catalog"); e.HasKey(c => c.Key); e.Property(c => c.Key).HasMaxLength(64); });
         b.Entity<StoreCommission>(e => { e.ToTable("StoreCommissions", "catalog"); e.Property(c => c.Percent).HasPrecision(5, 2); e.Property(c => c.Category).HasMaxLength(100); e.HasIndex(c => new { c.StoreId, c.Category }).IsUnique(); });
         b.Entity<StorePayout>(e => { e.ToTable("StorePayouts", "catalog"); e.Property(p => p.Amount).HasPrecision(18, 2); e.Property(p => p.Status).HasMaxLength(20); e.Property(p => p.Method).HasMaxLength(120); e.Property(p => p.Reference).HasMaxLength(120); e.HasIndex(p => p.StoreId); });
+        b.Entity<Dispute>(e => { e.ToTable("Disputes", "orders"); e.Property(d => d.Status).HasMaxLength(20); e.Property(d => d.OrderNo).HasMaxLength(40); e.HasIndex(d => d.Status); e.HasIndex(d => d.OrderId); });
+        b.Entity<ActivityLog>(e => { e.ToTable("ActivityLogs", "users"); e.Property(a => a.Action).HasMaxLength(40); e.Property(a => a.EntityType).HasMaxLength(20); e.Property(a => a.EntityId).HasMaxLength(40); e.Property(a => a.ActorName).HasMaxLength(120); e.HasIndex(a => a.CreatedAt); });
 
         b.Entity<Order>().ToTable("Orders", "orders");
         b.Entity<OrderItem>().ToTable("OrderItems", "orders");

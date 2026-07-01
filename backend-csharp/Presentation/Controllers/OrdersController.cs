@@ -11,7 +11,13 @@ namespace Gardrop.Presentation.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly IOrderService _orders;
-    public OrdersController(IOrderService orders) => _orders = orders;
+    private readonly IDisputeService _disputes;
+    public OrdersController(IOrderService orders, IDisputeService disputes) { _orders = orders; _disputes = disputes; }
+
+    // POST /api/orders/:id/dispute  { reason } — müştəri şikayət açır (defekt/yanlış məhsul)
+    [HttpPost("{id:long}/dispute")]
+    public async Task<IActionResult> OpenDispute(long id, [FromBody] DisputeCreateDto dto, CancellationToken ct) =>
+        (await _disputes.CreateAsync(User.GetUserId()!.Value, id, dto, ct)).ToActionResult();
 
     // POST /api/orders
     [HttpPost]

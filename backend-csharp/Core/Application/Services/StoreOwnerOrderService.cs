@@ -66,7 +66,7 @@ public class StoreOwnerOrderService : StoreOwnerServiceBase, IStoreOwnerOrderSer
         if (s is null) return NotOwned;
         if (!_orderStatus.IsValidStatus(dto.Status)) return OpResult.Fail(400, "Yanlış status");
         if (!_orderStatus.StoreAllowedStatuses.Contains(dto.Status))
-            return OpResult.Fail(403, "Mağaza yalnız sifarişi \"Hazırlandı\" işarələyə və ya ləğv edə bilər");
+            return OpResult.Fail(403, "Mağaza yalnız sifarişi \"Hazırlandı\" və ya \"Yolda\" işarələyə bilər (status geri dönmür)");
 
         var idSet = (await _db.Products.AsNoTracking().Where(p => p.StoreId == storeId).Select(p => p.Id).ToListAsync(ct)).ToHashSet();
         var o = await _db.Orders.Include(x => x.Items).Include(x => x.User).FirstOrDefaultAsync(x => x.Id == orderId, ct);
@@ -113,19 +113,7 @@ public class StoreOwnerOrderService : StoreOwnerServiceBase, IStoreOwnerOrderSer
             return OpResult.Ok(new StoreOrderPreparedResult(o.Id, o.Status, true, true, orderStoreIds.Count, orderStoreIds.Count));
         }
 
-        // Hazırlanır-a geri qaytar (un-prepare).
-        if (dto.Status == OrderStatus.Preparing)
-        {
-            o.PreparedStores.Remove(storeId);
-            await _orderStatus.ApplyStatusAsync(o, OrderStatus.Preparing, ct: ct);
-            await _db.SaveChangesAsync(ct);
-            await tx.CommitAsync(ct);
-            _rating.Request();
-            return OpResult.Ok(new StoreOrderPreparedResult(o.Id, o.Status, false, false,
-                o.PreparedStores.Count(p => orderStoreIds.Contains(p)), orderStoreIds.Count));
-        }
-
-        // Hazırlandı (default) — çox-mağaza per-store işarələmə.
+        // Hazırlandı (default) — çox-mağaza per-store işarələmə. (Geri qaytarma yoxdur — Live Status bir-yönlü.)
         var prepared = o.PreparedStores;
         if (!prepared.Contains(storeId)) prepared.Add(storeId);
 
@@ -149,5 +137,27 @@ public class StoreOwnerOrderService : StoreOwnerServiceBase, IStoreOwnerOrderSer
             Id: o.Id, Status: o.Status, MyPrepared: true, AllReady: allReady,
             PreparedCount: prepared.Count(p => orderStoreIds.Contains(p)),
             StoreCount: orderStoreIds.Count));
+    }
+
+    // Kuryeri çağır — mağaza admin/dispatch-ə bildiriş göndərir (kuryer inteqrasiyası gələndə real API-yə bağlanacaq).
+    public async Task<OpResult> RequestCourierAsync(long userId, int storeId, long orderId, CancellationToken ct = default)
+    {
+        var s = await OwnedAsync(userId, storeId, ct);
+        if (s is null) return NotOwned;
+
+        var idSet = (await _db.Products.AsNoTracking().Where(p => p.StoreId == storeId).Select(p => p.Id).ToListAsync(ct)).ToHashSet();
+        var o = await _db.Orders.Include(x => x.Items).FirstOrDefaultAsync(x => x.Id == orderId, ct);
+        if (o is null) return OpResult.Fail(404, "Sifariş tapılmadı");
+        var (mine, _) = MyItems(o.Items, idSet);
+        if (mine == 0) return OpResult.Fail(403, "Bu sifarişdə sizin məhsulunuz yoxdur");
+        if (o.Status is not (OrderStatus.Prepared or OrderStatus.OnTheWay))
+            return OpResult.Fail(400, "Kuryer yalnız hazır sifariş üçün çağırıla bilər");
+
+        var adminIds = await _db.Users.AsNoTracking().Where(u => u.IsAdmin).Select(u => u.Id).ToListAsync(ct);
+        foreach (var aid in adminIds)
+            _notify.Notify(aid, "courier", "Kuryer çağırıldı",
+                $"{s.Name} mağazası {o.OrderNo} sifarişi üçün kuryer çağırdı — götürülməyə hazırdır.");
+        await _db.SaveChangesAsync(ct);
+        return OpResult.Ok(new { ok = true, orderId = o.Id });
     }
 }

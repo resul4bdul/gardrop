@@ -4,7 +4,7 @@ const { useState, useEffect, useCallback } = React;
 import { money, date, statusLabel, STATUS_COLORS, Pill, useLive, fmt } from "./shared";
 import { Ic } from "../lib/panelIcons";
 import { StatTile, SectionCard, BarChart, HBar, Segmented } from "../lib/iosUi";
-import type { ApiFn, ToastFn, Stats, Analytics } from "./types";
+import type { ApiFn, ToastFn, Stats, Analytics, ActivityItem } from "./types";
 
 const PERIODS: [string, string][] = [['7', '7 gün'], ['14', '14 gün'], ['30', '30 gün']];
 
@@ -13,9 +13,11 @@ export function Dashboard({ api }: { api: ApiFn; toast: ToastFn }) {
     const [a, setA] = useState<Analytics | null>(null);
     const [days, setDays] = useState('14');
     const [err, setErr] = useState('');
+    const [feed, setFeed] = useState<ActivityItem[]>([]);
     const refresh = useCallback(() => {
       api<Stats>('/api/admin/stats').then(setS).catch((e) => setErr((e as Error).message));
       api<Analytics>(`/api/admin/analytics?days=${days}`).then(setA).catch(() => {});
+      api<ActivityItem[]>('/api/admin/activity?limit=20').then(setFeed).catch(() => {});
     }, [api, days]);
     useEffect(() => { refresh(); }, [refresh]);
     useLive(refresh);
@@ -136,6 +138,21 @@ export function Dashboard({ api }: { api: ApiFn; toast: ToastFn }) {
             )}
           </SectionCard>
         </div>
+
+        {/* Aktivlik jurnalı (kim/nə vaxt/nə dəyişdi) */}
+        <SectionCard title="Son aktivlik" sub="Platforma dəyişiklikləri" bodyClass="!px-0">
+          {feed.length === 0 ? <p className="text-t3 text-sm px-5">Hələ aktivlik yoxdur</p> : (
+            <div className="divide-y divide-bdr max-h-96 overflow-y-auto">
+              {feed.map((f) => (
+                <div key={f.id} className="flex items-start gap-3 px-5 py-2.5">
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-bg2 text-t2 shrink-0 mt-0.5">{f.action}</span>
+                  <div className="min-w-0 flex-1"><div className="text-sm text-brand truncate">{f.detail}</div><div className="text-t3 text-xs">{f.actorName}</div></div>
+                  <span className="text-t3 text-xs shrink-0">{date(f.createdAt)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </SectionCard>
       </div>
     );
   }

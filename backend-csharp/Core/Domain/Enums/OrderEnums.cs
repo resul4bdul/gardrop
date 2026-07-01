@@ -44,6 +44,15 @@ public static class PayoutStatus
     public static readonly string[] All = { Pending, Paid };
 }
 
+/// <summary>Müştəri münaqişəsi (dispute) vəziyyəti (wire/DB string dəyəri = const value).</summary>
+public static class DisputeStatus
+{
+    public const string Open = "Açıq";
+    public const string Resolved = "Həll olundu";
+
+    public static readonly string[] All = { Open, Resolved };
+}
+
 /// <summary>Çatdırılma növü (wire/DB string dəyəri = const value).</summary>
 public static class DeliveryType
 {

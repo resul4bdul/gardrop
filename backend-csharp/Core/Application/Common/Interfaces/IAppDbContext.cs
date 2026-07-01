@@ -27,6 +27,8 @@ public interface IAppDbContext
     DbSet<SiteContent> SiteContents { get; }
     DbSet<StoreCommission> StoreCommissions { get; }
     DbSet<StorePayout> StorePayouts { get; }
+    DbSet<Dispute> Disputes { get; }
+    DbSet<ActivityLog> ActivityLogs { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

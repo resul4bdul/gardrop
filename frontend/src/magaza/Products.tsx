@@ -30,9 +30,11 @@ export function Products({ api, toast, store, cats }: { api: ApiFn; toast: Toast
       (!fStock || stockState(p) === fStock));
     const resetFilters = () => { setQ(''); setFCat(''); setFStatus(''); setFStock(''); };
     const filtered = !!(q || fCat || fStatus || fStock);
+    const addNew = () => setEdit({ name: '', brand: '', price: 0, oldPrice: null, buyPrice: null, discount: null, category: '', subcategory: '', subSubcategory: '', gender: 'Uniseks', sizeSystem: 'INT', fitType: 'Regular', stretch: 'medium', sizeBehavior: 'Standard', washShrink: false, sizeChart: [], sizeStock: {}, imageUrls: [], color: '', material: '', season: '', tags: [], seoTitle: '', seoDescription: '', isDraft: false, description: '' });
+    const noProducts = !!rows && rows.length === 0;   // heç məhsul yoxdur (filtr deyil)
     return (
       <div>
-        <Toolbar onAdd={() => setEdit({ name: '', brand: '', price: 0, oldPrice: null, buyPrice: null, discount: null, category: '', subcategory: '', subSubcategory: '', gender: 'Uniseks', sizeSystem: 'INT', fitType: 'Regular', stretch: 'medium', sizeBehavior: 'Standard', washShrink: false, sizeChart: [], sizeStock: {}, imageUrls: [], color: '', material: '', season: '', tags: [], seoTitle: '', seoDescription: '', isDraft: false, description: '' })} addLabel="Məhsul əlavə et">
+        <Toolbar onAdd={addNew} addLabel="Məhsul əlavə et">
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Axtar…" className="bg-white border border-bdr rounded-btn px-3 py-2 text-sm w-48" />
           <select value={fCat} onChange={(e) => setFCat(e.target.value)} className={SELECT_CLS + ' w-auto'}><option value="">Kateqoriya: hamısı</option>{cats.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}</select>
           <select value={fStatus} onChange={(e) => setFStatus(e.target.value)} className={SELECT_CLS + ' w-auto'}><option value="">Status: hamısı</option><option value="Approved">Təsdiqli</option><option value="Pending">Gözləyir</option><option value="Rejected">Rədd edilib</option><option value="Draft">Qaralama</option></select>
@@ -58,7 +60,16 @@ export function Products({ api, toast, store, cats }: { api: ApiFn; toast: Toast
         <Card className="hidden md:block">
           <table className="w-full min-w-[640px]">
             <thead><tr className="bg-bg2"><Th>Şəkil</Th><Th>Ad</Th><Th>Kateqoriya</Th><Th>Qiymət</Th><Th>Endirim</Th><Th>Stok</Th><Th>Satış</Th><Th>Baxış</Th><Th>Status</Th><Th className="text-right">Əməliyyat</Th></tr></thead>
-            {!shown ? <TableSkeleton cols={10} /> : shown.length === 0 ? <EmptyRow cols={10} text="Məhsul yoxdur" /> : (
+            {!shown ? <TableSkeleton cols={10} /> : shown.length === 0 ? (
+              noProducts
+                ? <tbody><tr><td colSpan={10}><div className="flex flex-col items-center text-center py-16 px-6">
+                    <div className="w-16 h-16 rounded-2xl bg-blue/10 text-blue grid place-items-center text-3xl mb-4">🛍️</div>
+                    <h3 className="font-bold text-brand text-lg">İlk məhsulunu yüklə, satışa başla!</h3>
+                    <p className="text-sm text-t2 mt-1 max-w-sm">Şəkil, qiymət və ölçüləri əlavə et — məhsulun admin təsdiqindən sonra saytda görünəcək.</p>
+                    <button onClick={addNew} className="mt-5 bg-blue text-white px-5 py-2.5 rounded-btn text-sm font-semibold hover:bg-blue-700">＋ Məhsul əlavə et</button>
+                  </div></td></tr></tbody>
+                : <EmptyRow cols={10} text="Bu filtrə uyğun məhsul tapılmadı" />
+            ) : (
               <tbody>
                 {shown.map((p) => {
                   const ap = badgeFor(p);
@@ -88,7 +99,11 @@ export function Products({ api, toast, store, cats }: { api: ApiFn; toast: Toast
         {/* Mobil kartlar */}
         <div className="md:hidden space-y-2.5">
           {!shown ? [0,1,2].map(i => <div key={i} className="skel h-24 rounded-card" />)
-            : shown.length === 0 ? <Card><div className="px-4 py-10 text-center text-t3 text-sm">Məhsul yoxdur</div></Card>
+            : shown.length === 0 ? <Card><div className="flex flex-col items-center text-center py-12 px-6">
+                <div className="w-14 h-14 rounded-2xl bg-blue/10 text-blue grid place-items-center text-2xl mb-3">🛍️</div>
+                <h3 className="font-bold text-brand">{noProducts ? 'İlk məhsulunu yüklə!' : 'Nəticə tapılmadı'}</h3>
+                {noProducts && <><p className="text-sm text-t2 mt-1">Satışa başlamaq üçün məhsul əlavə et.</p><button onClick={addNew} className="mt-4 bg-blue text-white px-4 py-2 rounded-btn text-sm font-semibold">＋ Məhsul əlavə et</button></>}
+              </div></Card>
             : shown.map((p) => {
               const ap = badgeFor(p);
               return (
@@ -122,7 +137,18 @@ export function Products({ api, toast, store, cats }: { api: ApiFn; toast: Toast
   }
 
 export function ProductEdit({ product, cats, onClose, onSave }: { product: Product; cats: Category[]; onClose: () => void; onSave: (p: Product) => void }) {
-    const [f, setF] = useState<Product>({ ...product, sizeStock: product.sizeStock || {}, variants: product.variants || [], imageUrls: (product.imageUrls && product.imageUrls.length) ? product.imageUrls : [], gender: product.gender || 'Uniseks', sizeSystem: product.sizeSystem || 'INT', fitType: product.fitType || 'Regular', stretch: product.stretch || 'medium', tags: product.tags || [], season: product.season || '', seoTitle: product.seoTitle || '', seoDescription: product.seoDescription || '', isDraft: !!product.isDraft });
+    // Autosave: qaralama localStorage-da saxlanılır (internet gedərsə/səhifə yenilənərsə itməsin).
+    const draftKey = `gardrop_pdraft_${product.id ?? 'new'}`;
+    const baseProduct = { ...product, sizeStock: product.sizeStock || {}, variants: product.variants || [], imageUrls: (product.imageUrls && product.imageUrls.length) ? product.imageUrls : [], gender: product.gender || 'Uniseks', sizeSystem: product.sizeSystem || 'INT', fitType: product.fitType || 'Regular', stretch: product.stretch || 'medium', tags: product.tags || [], season: product.season || '', seoTitle: product.seoTitle || '', seoDescription: product.seoDescription || '', isDraft: !!product.isDraft };
+    const [f, setF] = useState<Product>(() => {
+      try { const saved = localStorage.getItem(draftKey); if (saved) return { ...baseProduct, ...JSON.parse(saved) }; } catch { /* ignore */ }
+      return baseProduct;
+    });
+    const [restored, setRestored] = useState(() => { try { return !!localStorage.getItem(draftKey); } catch { return false; } });
+    // f dəyişdikcə throttled saxla.
+    useEffect(() => { const t = setTimeout(() => { try { localStorage.setItem(draftKey, JSON.stringify(f)); } catch { /* ignore */ } }, 600); return () => clearTimeout(t); }, [f, draftKey]);
+    const clearDraft = () => { try { localStorage.removeItem(draftKey); } catch { /* ignore */ } };
+    const discardDraft = () => { clearDraft(); setF(baseProduct); setRestored(false); };
     // Variant matrisi (ölçü × rəng → SKU + stok). Aktivdirsə sadə ölçü/stok əvəzinə matris istifadə olunur.
     const [useVariants, setUseVariants] = useState(!!(product.variants && product.variants.length));
     const vlist = f.variants || [];
@@ -219,6 +245,7 @@ export function ProductEdit({ product, cats, onClose, onSave }: { product: Produ
     const valid = f.isDraft ? !!f.name : (f.name && f.category && f.price != null && stockOk && (useVariants || !chartError));
     const submit = () => {
       const imgs = (f.imageUrls || []).map((u) => (u || '').trim()).filter(Boolean);
+      clearDraft();   // uğurla göndərildikdə qaralama silinir
       // Variant rejimi: matris göndərilir (backend SizeStock/Sizes/Stock/Color törədir). Söndürülübsə boş matris → təmizlə.
       onSave({ ...f, imageUrls: imgs, images: imgs.length, price: f.price,
         variants: useVariants ? vlist : [],
@@ -228,6 +255,12 @@ export function ProductEdit({ product, cats, onClose, onSave }: { product: Produ
     };
     return (
       <Modal title={product.id ? 'Məhsulu redaktə et' : 'Yeni məhsul'} onClose={onClose} wide>
+        {restored && (
+          <div className="mb-3 flex items-center justify-between gap-3 bg-bg2 border border-bdr rounded-btn px-3 py-2 text-sm">
+            <span className="text-t2">Saxlanmış qaralama bərpa olundu.</span>
+            <button type="button" onClick={discardDraft} className="text-blue font-semibold hover:underline shrink-0">Təmizlə</button>
+          </div>
+        )}
         <div className="grid sm:grid-cols-2 gap-3">
           <div className="sm:col-span-2"><Field label="Ad *" value={f.name || ''} onChange={str('name')} /></div>
           <div className="sm:col-span-2">

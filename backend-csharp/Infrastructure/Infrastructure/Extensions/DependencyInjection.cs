@@ -110,6 +110,8 @@ public static class DependencyInjection
         services.AddScoped<ISiteContentService, SiteContentService>();
         services.AddScoped<ICommissionService, CommissionService>();
         services.AddScoped<IStorePayoutService, StorePayoutService>();
+        services.AddScoped<IActivityLogService, ActivityLogService>();
+        services.AddScoped<IDisputeService, DisputeService>();
         services.AddScoped<ISizeService, SizeService>();
         services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<IReviewService, ReviewService>();

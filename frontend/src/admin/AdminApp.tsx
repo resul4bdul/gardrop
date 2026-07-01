@@ -17,8 +17,16 @@ import Orders from "./Orders";
 import Coupons from "./Coupons";
 import Reviews from "./Reviews";
 import Content from "./Content";
+import Disputes from "./Disputes";
 
 const { useState, useEffect, useCallback, useRef } = React;
+
+// Qaranlıq/işıqlı rejim keçidi — html.dark class + localStorage.
+function ThemeToggle() {
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
+  const toggle = () => { const n = !dark; setDark(n); document.documentElement.classList.toggle("dark", n); try { localStorage.setItem("gardrop_theme", n ? "dark" : "light"); } catch { /* ignore */ } };
+  return <button onClick={toggle} title={dark ? "İşıqlı rejim" : "Qaranlıq rejim"} aria-label="Tema" className="w-9 h-9 rounded-btn hover:bg-bg2 flex items-center justify-center text-lg">{dark ? "☀️" : "🌙"}</button>;
+}
 
 // ─────────────────────────  Login  ─────────────────────────
 function Login({ onLogin }: { onLogin: (token: string, user: Me) => void }) {
@@ -102,6 +110,7 @@ const NAV = [
   { k: 'stores', label: 'Mağazalar', icon: 'stores' },
   { k: 'categories', label: 'Kateqoriyalar', icon: 'categories' },
   { k: 'orders', label: 'Sifarişlər', icon: 'orders' },
+  { k: 'disputes', label: 'Münaqişələr', icon: 'reviews' },
   { k: 'coupons', label: 'Kuponlar', icon: 'coupons' },
   { k: 'reviews', label: 'Rəylər', icon: 'reviews' },
   { k: 'content', label: 'Sayt məzmunu', icon: 'content' },
@@ -151,6 +160,7 @@ function App() {
     dashboard: <Dashboard {...props} />, users: <Users {...props} />, products: <Products {...props} />,
     stores: <Stores {...props} />, categories: <Categories {...props} />, orders: <Orders {...props} />,
     coupons: <Coupons {...props} />, reviews: <Reviews {...props} />, content: <Content {...props} />,
+    disputes: <Disputes {...props} />,
   };
   const cur = NAV.find((n) => n.k === page);
 
@@ -197,6 +207,7 @@ function App() {
       <main className="flex-1 min-w-0 flex flex-col">
         <header className="h-16 bg-white/85 backdrop-blur border-b border-bdr px-4 sm:px-6 flex items-center gap-3 sticky top-0 z-30">
           <div className="flex items-center gap-2.5">{cur && (() => { const I = Ic[cur.icon]; return <span className="grid w-8 h-8 rounded-btn bg-brand/[0.06] text-brand place-items-center"><I className="w-[18px] h-[18px]" /></span>; })()}<h1 className="text-lg sm:text-xl font-bold text-brand">{cur?.label}</h1></div>
+          <div className="ml-auto"><ThemeToggle /></div>
         </header>
         <div className="p-4 sm:p-6 anim-fade flex-1 pb-24 md:pb-6" key={page}>
           {pages[page]}

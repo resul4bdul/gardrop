@@ -38,6 +38,16 @@ export interface Payout {
   status: string; paidAt?: string | null; method: string; reference: string; note: string; createdAt: string;
 }
 
+export interface Dispute {
+  id: number; orderId: number; orderNo: string; userId: number; userName: string;
+  storeId?: number | null; storeName: string; reason: string; status: string;
+  resolution: string; resolvedAt?: string | null; createdAt: string;
+}
+
+export interface ActivityItem {
+  id: number; actorName: string; action: string; entityType: string; entityId: string; detail: string; createdAt: string;
+}
+
 export interface Coupon {
   id?: number; code: string; type: string; value: number | string;
   minOrder?: number | string; active?: boolean; expiresAt?: string | null; maxUses?: number | string | null; used?: number;
