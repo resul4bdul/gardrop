@@ -6,11 +6,10 @@ Gardrop.az marketplace-in veb interfeysi.
 
 React 19 · TypeScript · Vite · TailwindCSS
 
-> **Qeyd:** UI `gardrop.html` / `admin.html` / `magaza.html`-dən birə-bir (1:1) port edilmiş
-> tətbiq fayllarıdır (vendored). Hər biri `@ts-nocheck`-dir və `createRoot` ilə özünü mount edir.
-> Klassik JSX runtime tələb olunur (bax `vite.config.ts`) — i18n qatı `React.createElement`-i
-> override edir və bu yalnız classic runtime-da tutulur. **Daxili məntiq/dizayn dəyişdirilmir**;
-> ona görə bu üç fayl lint/format-dan kənar saxlanılır.
+> **Qeyd:** Müştəri saytı (`src/app`) `gardrop.html`-dən port edilmiş vendored tətbiqdir (`@ts-nocheck`,
+> classic JSX runtime — i18n `React.createElement`-i override edir). **Admin** və **Mağaza** panelləri
+> isə real TypeScript ilə yenidən yazılıb (`src/admin`, `src/magaza`) — tip-təhlükəsiz, ortaq `lib/` atomları.
+> Brend rəng: **emerald #0B8457**. Panellərdə **Dark Mode** var (class-əsaslı, `localStorage` `gardrop_theme`).
 
 ## Çoxsəhifəli (MPA) struktur
 
@@ -28,13 +27,14 @@ frontend/
 ├── public/favicon.svg
 ├── src/
 │   ├── main.tsx                 # / giriş nöqtəsi
-│   ├── app/GardropApp.tsx       # müştəri saytı (vendored)
-│   ├── admin/{main.tsx,AdminApp.tsx,admin.css}
-│   ├── magaza/{main.tsx,MagazaApp.tsx,magaza.css}
+│   ├── app/GardropApp.tsx       # müştəri saytı (vendored, @ts-nocheck)
+│   ├── admin/                   # admin panel (real TS: AdminApp, Dashboard, Stores, Disputes, ...)
+│   ├── magaza/                  # mağaza panel (real TS: MagazaApp, Dashboard, Orders, Products, ...)
+│   ├── lib/                     # ortaq atomlar: panelIcons, iosUi, csv
 │   ├── styles/globals.css       # @tailwind + orijinal <style>
 │   └── vite-env.d.ts
 ├── eslint.config.js · .prettierrc.json · .editorconfig
-├── tailwind.config.ts           # brand/accent rəngləri, radiuslar
+├── tailwind.config.ts           # emerald brend rəng, darkMode:'class', radiuslar
 ├── vite.config.ts               # classic JSX + @ alias + MPA input + dev proxy
 └── tsconfig*.json
 ```
