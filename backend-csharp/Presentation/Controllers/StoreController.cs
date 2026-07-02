@@ -16,9 +16,10 @@ public class StoreController : ControllerBase
     private readonly IStoreOwnerProductService _products;
     private readonly IStoreOwnerOrderService _orders;
     private readonly IStoreOwnerReviewService _reviews;
+    private readonly IProblemService _problems;
     public StoreController(IStoreProfileService profile, IStoreOwnerProductService products,
-        IStoreOwnerOrderService orders, IStoreOwnerReviewService reviews)
-    { _profile = profile; _products = products; _orders = orders; _reviews = reviews; }
+        IStoreOwnerOrderService orders, IStoreOwnerReviewService reviews, IProblemService problems)
+    { _profile = profile; _products = products; _orders = orders; _reviews = reviews; _problems = problems; }
 
     private long Uid => User.GetUserId()!.Value;
     private IActionResult Map(OpResult r) => r.ToActionResult();
@@ -70,6 +71,21 @@ public class StoreController : ControllerBase
     [HttpPost("{id:int}/orders/{oid:long}/courier")]
     public async Task<IActionResult> RequestCourier(int id, long oid, CancellationToken ct) =>
         Map(await _orders.RequestCourierAsync(Uid, id, oid, ct));
+
+    // ── Problemlər (geri qaytarma/şikayət — satıcı 48 saatda cavab verir) ──
+    [HttpGet("{id:int}/problems")]
+    public async Task<IActionResult> Problems(int id, CancellationToken ct) =>
+        Map(await _problems.StoreListAsync(Uid, id, ct));
+
+    // POST /api/store/{id}/problems/{pid}/respond  { accept, note } — qəbul/rədd (rədd → arbitraj)
+    [HttpPost("{id:int}/problems/{pid:long}/respond")]
+    public async Task<IActionResult> RespondProblem(int id, long pid, [FromBody] ProblemStoreRespondDto dto, CancellationToken ct) =>
+        Map(await _problems.StoreRespondAsync(Uid, id, pid, dto, ct));
+
+    // POST /api/store/{id}/problems/{pid}/received — qaytarılan mal təhvil alındı → auto-refund
+    [HttpPost("{id:int}/problems/{pid:long}/received")]
+    public async Task<IActionResult> ProblemReceived(int id, long pid, CancellationToken ct) =>
+        Map(await _problems.StoreReceivedAsync(Uid, id, pid, ct));
 
     // ── Rəylər ──
     [HttpGet("{id:int}/reviews")]

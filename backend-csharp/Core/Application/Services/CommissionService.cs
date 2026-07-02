@@ -12,7 +12,8 @@ public class CommissionService : ICommissionService
 
     public async Task<Dictionary<int, decimal>> NetFactorsAsync(int storeId, CancellationToken ct = default)
     {
-        var prods = await _db.Products.AsNoTracking().Where(p => p.StoreId == storeId)
+        // Silinmiş məhsul da daxil — keçmiş satışların komissiya faktoru düzgün hesablansın (yoxsa F=1 → sıfır komissiya).
+        var prods = await _db.Products.AsNoTracking().IgnoreQueryFilters().Where(p => p.StoreId == storeId)
             .Select(p => new { p.Id, p.Category }).ToListAsync(ct);
         var coms = await _db.StoreCommissions.AsNoTracking().Where(c => c.StoreId == storeId).ToListAsync(ct);
         var byCat = coms.Where(c => c.Category != "").ToDictionary(c => c.Category, c => c.Percent);

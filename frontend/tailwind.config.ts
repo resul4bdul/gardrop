@@ -1,8 +1,8 @@
 import type { Config } from "tailwindcss";
 
-// gardrop.html-dəki tailwind.config ilə birə-bir eyni (CDN config → build config).
+// Köhnə Vite frontend-in tailwind.config.ts-i ilə birə-bir eyni tokenlər (dizayn 1:1 qorunur).
 export default {
-  content: ["./*.html", "./src/**/*.{ts,tsx}"],
+  content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./lib/**/*.{ts,tsx}"],
   darkMode: "class",
   theme: {
     extend: {
@@ -23,11 +23,6 @@ export default {
         t3: "#9E9E9E",
         td: "#C2C2C2",
         sale: "#E53E3E",
-        // admin/magaza panellərinin əlavə rəngləri.
-        // QEYD: bare `blue`/`amber` (DEFAULT) köhnə panellər üçün; nömrəli şkala (50..700) merchant dizaynı üçün.
-        // Brend rəngi ELEGANT DƏRİN EMERALD (#0B8457). `blue` adı + `emerald` override eyni şkalaya bağlı
-        // ki köhnə `text-blue`/`bg-blue` + merchant `emerald-*` hamısı bu tona düşsün (class adları sınmır).
-        // Kifayət qədər tünddür → ağ yazı kontrastı yaxşıdır.
         blue: { DEFAULT: "#0B8457", 50: "#ECFDF5", 100: "#D1FAE5", 500: "#12B886", 600: "#0B8457", 700: "#086B46" },
         emerald: { DEFAULT: "#0B8457", 50: "#ECFDF5", 100: "#D1FAE5", 500: "#12B886", 600: "#0B8457", 700: "#086B46" },
         amber: { DEFAULT: "#E8A317", 50: "#FFFBEB", 100: "#FEF3C7", 500: "#F59E0B", 700: "#B45309", 800: "#92400E" },

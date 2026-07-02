@@ -12,9 +12,16 @@ public class OrdersController : ControllerBase
 {
     private readonly IOrderService _orders;
     private readonly IDisputeService _disputes;
-    public OrdersController(IOrderService orders, IDisputeService disputes) { _orders = orders; _disputes = disputes; }
+    private readonly IProblemService _problems;
+    public OrdersController(IOrderService orders, IDisputeService disputes, IProblemService problems)
+    { _orders = orders; _disputes = disputes; _problems = problems; }
 
-    // POST /api/orders/:id/dispute  { reason } — müştəri şikayət açır (defekt/yanlış məhsul)
+    // POST /api/orders/:id/problem  { reason, description, photos } — müştəri problem açır (Trendyol modeli)
+    [HttpPost("{id:long}/problem")]
+    public async Task<IActionResult> OpenProblem(long id, [FromBody] ProblemCreateDto dto, CancellationToken ct) =>
+        (await _problems.CreateAsync(User.GetUserId()!.Value, id, dto, ct)).ToActionResult();
+
+    // POST /api/orders/:id/dispute — KÖHNƏ sadə şikayət axını (yeni UI /problem istifadə edir; geriyə uyumluluq üçün saxlanılır)
     [HttpPost("{id:long}/dispute")]
     public async Task<IActionResult> OpenDispute(long id, [FromBody] DisputeCreateDto dto, CancellationToken ct) =>
         (await _disputes.CreateAsync(User.GetUserId()!.Value, id, dto, ct)).ToActionResult();

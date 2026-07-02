@@ -76,7 +76,9 @@ public class StoreProfileService : StoreOwnerServiceBase, IStoreProfileService
         var s = await OwnedAsync(userId, storeId, ct);
         if (s is null) return NotOwned;
 
-        var prodList = await _db.Products.AsNoTracking().Where(p => p.StoreId == storeId)
+        // BÜTÜN məhsullar (silinmişlər daxil) — silinən məhsulun keçmiş satışı/rəyi statistikadan düşməsin.
+        // (bax menfiler 2.6: sifariş tarixçəsi qalır; aktiv məhsul sayı isə ayrıca, filtrli hesablanır.)
+        var prodList = await _db.Products.AsNoTracking().IgnoreQueryFilters().Where(p => p.StoreId == storeId)
             .Select(p => new { p.Id, p.Name }).ToListAsync(ct);
         var nameById = prodList.ToDictionary(p => p.Id, p => p.Name);
         var idSet = nameById.Keys.ToHashSet();
@@ -112,7 +114,8 @@ public class StoreProfileService : StoreOwnerServiceBase, IStoreProfileService
         int pendingOrders = orderMeta.Count(x => x.Status == OrderStatus.Preparing);
         var statusCounts = orderMeta.GroupBy(x => x.Status).ToDictionary(g => g.Key, g => g.Count());
         decimal avgOrder = myOrderCount > 0 ? Math.Round(totalSales / myOrderCount, 2) : 0m;
-        int activeProducts = prodList.Count;
+        // Aktiv məhsul sayı = yalnız silinməmiş (qlobal filtr tətbiq olunur) — canlı kataloqu əks etdirir.
+        int activeProducts = await _db.Products.AsNoTracking().CountAsync(p => p.StoreId == storeId, ct);
 
         var lowStock = await _db.Products.AsNoTracking()
             .Where(p => p.StoreId == storeId && p.Stock < 5)
@@ -154,7 +157,8 @@ public class StoreProfileService : StoreOwnerServiceBase, IStoreProfileService
         var s = await OwnedAsync(userId, storeId, ct);
         if (s is null) return NotOwned;
 
-        var prods = await _db.Products.AsNoTracking().Where(p => p.StoreId == storeId)
+        // Maliyyə hesabatı silinmiş məhsulun keçmiş satışını da əhatə etsin → filtrləri ötür (bax menfiler 2.6).
+        var prods = await _db.Products.AsNoTracking().IgnoreQueryFilters().Where(p => p.StoreId == storeId)
             .Select(p => new { p.Id, p.Category }).ToListAsync(ct);
         var catById = prods.ToDictionary(p => p.Id, p => p.Category ?? "");
         var idSet = catById.Keys.ToHashSet();
@@ -220,7 +224,8 @@ public class StoreProfileService : StoreOwnerServiceBase, IStoreProfileService
         if (s is null) return NotOwned;
         days = Math.Clamp(days, 1, 90);
 
-        var myIds = (await _db.Products.AsNoTracking().Where(p => p.StoreId == storeId)
+        // Analitika silinmiş məhsulun keçmiş satışını da göstərsin (top/least, ad, şəkil) → filtrləri ötür.
+        var myIds = (await _db.Products.AsNoTracking().IgnoreQueryFilters().Where(p => p.StoreId == storeId)
             .Select(p => new { p.Id, p.Name, p.ImageUrls }).ToListAsync(ct));
         var nameById = myIds.ToDictionary(p => p.Id, p => p.Name);
         var imageById = myIds.ToDictionary(p => p.Id, p => p.ImageUrls.FirstOrDefault());

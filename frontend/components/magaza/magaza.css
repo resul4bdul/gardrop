@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Satıcı paneli — Merchant Dashboard (SF Pro, blue #0B8457, slate bg) ===== */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; font-family: 'SF Pro Display', 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; background: #F8FAFC; color: #0F172A; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #D8D8D8; border-radius: 4px; }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes popIn  { from { opacity:0; transform:translateY(10px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+@keyframes slideL { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.skel { background: linear-gradient(90deg,#F1F5F9 25%,#E2E8F0 37%,#F1F5F9 63%); background-size: 800px 100%; animation: shimmer 1.4s infinite linear; border-radius:10px; }
+.anim-fade { animation: fadeIn .3s ease; }
+.anim-pop  { animation: popIn .28s cubic-bezier(0.34,1.56,0.64,1); }
+.anim-slide-l { animation: slideL .25s cubic-bezier(0.32,0.72,0,1); }
+.anim-sheet { animation: sheetUp .3s cubic-bezier(0.32,0.72,0,1); }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+button:not(:disabled) { transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease, border-color .2s ease, opacity .2s ease; }
+button:not(:disabled):active { transform: scale(0.97); }
+.row-h:hover { background: #F8FAFC; }
+table { border-collapse: collapse; }
+input, select, textarea { outline: none; }
+input:focus, select:focus, textarea:focus { border-color: #0B8457 !important; box-shadow: 0 0 0 3px rgba(11,132,87,0.14); }
+.leaflet-container { font: inherit; }
+
+/* ===== Dark Mode (class-based; JSX toxunulmur — səthi utility class-ları remap edilir) ===== */
+/* ── Dark mode — Apple iOS sistem palitrası (bax admin.css qeydi) ── */
+html.dark { color-scheme: dark; }
+html.dark body { background: #000000; color: #FFFFFF; }
+.dark .bg-white { background-color: #1C1C1E !important; }
+.dark .bg-slate-50 { background-color: #2C2C2E !important; }
+.dark .bg-slate-100 { background-color: #3A3A3C !important; }
+.dark .bg-slate-200 { background-color: #48484A !important; }
+.dark .bg-slate-300 { background-color: #545456 !important; }
+.dark .bg-slate-900 { background-color: #F2F2F7 !important; color:#1C1C1E !important; } /* tünd düymələr tərs çevrilir */
+.dark .text-slate-900 { color: #FFFFFF !important; }
+.dark .text-slate-800 { color: rgba(235,235,245,0.86) !important; }
+.dark .text-slate-700 { color: rgba(235,235,245,0.72) !important; }
+.dark .text-slate-600 { color: rgba(235,235,245,0.60) !important; }
+.dark .text-slate-500 { color: rgba(235,235,245,0.44) !important; }
+.dark .text-slate-400 { color: rgba(235,235,245,0.30) !important; }
+.dark .border-slate-100 { border-color: rgba(84,84,88,0.45) !important; }
+.dark .border-slate-200 { border-color: rgba(84,84,88,0.65) !important; }
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(84,84,88,0.45) !important; }
+.dark .divide-slate-50 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(84,84,88,0.30) !important; }
+.dark input, .dark textarea, .dark select { background-color: #1C1C1E !important; color: #FFFFFF !important; border-color: rgba(84,84,88,0.65) !important; }
+.dark input::placeholder, .dark textarea::placeholder { color: rgba(235,235,245,0.30) !important; }
+.dark .bg-emerald-50 { background-color: rgba(18,184,134,0.16) !important; }
+.dark .bg-amber-50 { background-color: rgba(255,214,10,0.14) !important; }
+.dark .bg-red-50 { background-color: rgba(255,69,58,0.16) !important; }
+.dark .bg-violet-50 { background-color: rgba(191,90,242,0.16) !important; }
+/* Frosted header (iOS material) */
+.dark .bg-white\/80, .dark .bg-white\/85 { background-color: rgba(28,28,30,0.82) !important; }
+.dark .bg-white\/95 { background-color: rgba(28,28,30,0.94) !important; }
+.dark .bg-slate-900\/40 { background-color: rgba(0,0,0,0.55) !important; }
+.dark .skel { background: linear-gradient(90deg,#1C1C1E 25%,#2C2C2E 37%,#1C1C1E 63%); background-size: 800px 100%; }
+.dark .shadow-sm, .dark .shadow-xs { box-shadow: 0 1px 3px rgba(0,0,0,0.6) !important; }
+.dark .row-h:hover { background: #2C2C2E; }
+
+/* ── Mobil cilalar ── */
+@media (max-width: 640px) {
+  /* iOS Safari fokusda avtomatik zoom etməsin deyə form elementləri >=16px */
+  input, select, textarea { font-size: 16px !important; }
+}

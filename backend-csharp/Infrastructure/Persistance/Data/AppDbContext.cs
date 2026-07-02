@@ -30,6 +30,8 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<StoreCommission> StoreCommissions => Set<StoreCommission>();
     public DbSet<StorePayout> StorePayouts => Set<StorePayout>();
     public DbSet<Dispute> Disputes => Set<Dispute>();
+    public DbSet<Problem> Problems => Set<Problem>();
+    public DbSet<ProblemEvent> ProblemEvents => Set<ProblemEvent>();
     public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
 
     protected override void OnModelCreating(ModelBuilder b)
@@ -174,6 +176,28 @@ public class AppDbContext : DbContext, IAppDbContext
         // Review şəkilləri List<string> ⇄ JSON
         b.Entity<Review>(e =>
             e.Property(r => r.ImageUrls).HasConversion(listConverter).Metadata.SetValueComparer(listComparer));
+
+        // Problem (geri qaytarma/şikayət — Trendyol modeli) + timeline hadisələri
+        b.Entity<Problem>(e =>
+        {
+            e.ToTable("Problems", "orders");
+            e.Property(p => p.OrderNo).HasMaxLength(40);
+            e.Property(p => p.Reason).HasMaxLength(40);
+            e.Property(p => p.Status).HasMaxLength(40);
+            e.Property(p => p.ReturnCostPayer).HasMaxLength(20);
+            e.Property(p => p.Photos).HasConversion(listConverter).Metadata.SetValueComparer(listComparer);
+            e.HasIndex(p => p.Status);
+            e.HasIndex(p => p.OrderId);
+            e.HasIndex(p => p.StoreId);
+            e.HasIndex(p => p.UserId);
+        });
+        b.Entity<ProblemEvent>(e =>
+        {
+            e.ToTable("ProblemEvents", "orders");
+            e.Property(x => x.Status).HasMaxLength(40);
+            e.Property(x => x.ActorRole).HasMaxLength(20);
+            e.HasIndex(x => x.ProblemId);
+        });
 
         b.Entity<Coupon>(e =>
         {

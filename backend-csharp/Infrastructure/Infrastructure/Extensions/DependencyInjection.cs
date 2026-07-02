@@ -75,6 +75,7 @@ public static class DependencyInjection
         services.AddHostedService(sp => sp.GetRequiredService<RatingRecomputeService>());
         services.AddHostedService<ExpiredCodeCleanupService>(); // vaxtı keçmiş OTP təmizliyi (saatlıq)
         services.AddHostedService<ExpressAutoCancelService>();  // ekspress 30dq auto-cancel + reytinq cəzası
+        services.AddHostedService<ProblemEscalationService>();  // problem: 48 saat satıcı cavabı bitdi → arbitraj
 
         // Process-daxili defolt implementasiyalar
         services.AddMemoryCache();
@@ -117,6 +118,7 @@ public static class DependencyInjection
         services.AddScoped<IStorePayoutService, StorePayoutService>();
         services.AddScoped<IActivityLogService, ActivityLogService>();
         services.AddScoped<IDisputeService, DisputeService>();
+        services.AddScoped<IProblemService, ProblemService>();
         services.AddScoped<ISizeService, SizeService>();
         services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<IReviewService, ReviewService>();

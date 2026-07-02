@@ -17,15 +17,27 @@ public class AdminController : ControllerBase
     private readonly IAdminAnalyticsService _analytics;
     private readonly IAdminReviewService _reviews;
     private readonly IDisputeService _disputes;
+    private readonly IProblemService _problems;
     private readonly IActivityLogService _activity;
     public AdminController(IAdminUserService users, IAdminCatalogService catalog, IAdminOrderService orders,
-        IAdminAnalyticsService analytics, IAdminReviewService reviews, IDisputeService disputes, IActivityLogService activity)
-    { _users = users; _catalog = catalog; _orders = orders; _analytics = analytics; _reviews = reviews; _disputes = disputes; _activity = activity; }
+        IAdminAnalyticsService analytics, IAdminReviewService reviews, IDisputeService disputes,
+        IProblemService problems, IActivityLogService activity)
+    { _users = users; _catalog = catalog; _orders = orders; _analytics = analytics; _reviews = reviews; _disputes = disputes; _problems = problems; _activity = activity; }
 
     private IActionResult Map(OpResult r) => r.ToActionResult();
     private long Uid => User.GetUserId()!.Value;
 
-    // ── Münaqişələr (dispute & refund) ──
+    // ── Problemlər (geri qaytarma/şikayət — Trendyol modeli arbitraj) ──
+    [HttpGet("problems")]
+    public async Task<IActionResult> Problems([FromQuery] string? status, CancellationToken ct) =>
+        Ok(await _problems.AdminListAsync(status, ct));
+
+    // POST /api/admin/problems/{id}/decide  { action: return|refund|reject|freeze, note, costPayer }
+    [HttpPost("problems/{id:long}/decide")]
+    public async Task<IActionResult> DecideProblem(long id, [FromBody] ProblemDecideDto dto, CancellationToken ct) =>
+        Map(await _problems.AdminDecideAsync(Uid, id, dto, ct));
+
+    // ── Münaqişələr (KÖHNƏ dispute axını — yeni UI "Problemlər" istifadə edir) ──
     [HttpGet("disputes")]
     public async Task<IActionResult> Disputes([FromQuery] string? status, CancellationToken ct) => Ok(await _disputes.ListAsync(status, ct));
 

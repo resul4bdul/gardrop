@@ -28,7 +28,8 @@ public class AdminAnalyticsService : IAdminAnalyticsService
             .Where(p => p.Stock <= 10).OrderBy(p => p.Stock)
             .Select(p => new AdminLowStockItem(p.Id, p.Name, p.Store, p.Stock)).Take(50).ToListAsync(ct);
 
-        var prodNames = await _db.Products.AsNoTracking().Select(p => new { p.Id, p.Name })
+        // Silinmiş məhsulun keçmiş rəy/satışı üçün adı hələ də lazımdır → filtrləri ötür (bax menfiler 2.6).
+        var prodNames = await _db.Products.AsNoTracking().IgnoreQueryFilters().Select(p => new { p.Id, p.Name })
             .ToDictionaryAsync(p => p.Id, p => p.Name, ct);
         var recentReviews = (await _db.Reviews.AsNoTracking()
             .OrderByDescending(r => r.CreatedAt).Take(8).ToListAsync(ct))
@@ -45,7 +46,8 @@ public class AdminAnalyticsService : IAdminAnalyticsService
         // GMV (ümumi geyim satışı) = ləğv-olunmayan sətir brutlarının cəmi.
         var itemGross = await _db.OrderItems.Where(oi => oi.Order!.Status != Cancelled)
             .GroupBy(oi => oi.ProductId).Select(g => new { Pid = g.Key, Gross = g.Sum(x => x.Price * x.Qty) }).ToListAsync(ct);
-        var prodMeta = await _db.Products.AsNoTracking().Select(p => new { p.Id, p.StoreId, p.Category }).ToListAsync(ct);
+        // Komissiya hesabı silinmiş məhsulun keçmiş satışını da əhatə etməlidir → filtrləri ötür.
+        var prodMeta = await _db.Products.AsNoTracking().IgnoreQueryFilters().Select(p => new { p.Id, p.StoreId, p.Category }).ToListAsync(ct);
         var prodMap = prodMeta.ToDictionary(p => p.Id, p => (p.StoreId, Cat: p.Category ?? ""));
         var coms = await _db.StoreCommissions.AsNoTracking().ToListAsync(ct);
         var byStore = coms.GroupBy(c => c.StoreId).ToDictionary(g => g.Key,
@@ -88,7 +90,8 @@ public class AdminAnalyticsService : IAdminAnalyticsService
         var s = await _db.Stores.AsNoTracking().FirstOrDefaultAsync(x => x.Id == storeId, ct);
         if (s is null) return null;
 
-        var idSet = (await _db.Products.AsNoTracking().Where(p => p.StoreId == storeId).Select(p => p.Id).ToListAsync(ct)).ToHashSet();
+        // Mağazanın BÜTÜN məhsulları (silinmişlər daxil) — silinən məhsulun keçmiş satışı GMV-dən düşməsin.
+        var idSet = (await _db.Products.AsNoTracking().IgnoreQueryFilters().Where(p => p.StoreId == storeId).Select(p => p.Id).ToListAsync(ct)).ToHashSet();
         var items = _db.OrderItems.AsNoTracking().Where(oi => idSet.Contains(oi.ProductId) && oi.Order!.Status != Cancelled);
         var agg = await items.GroupBy(oi => oi.ProductId)
             .Select(g => new { Pid = g.Key, Gross = g.Sum(x => x.Price * x.Qty), Units = g.Sum(x => x.Qty) }).ToListAsync(ct);
@@ -141,7 +144,8 @@ public class AdminAnalyticsService : IAdminAnalyticsService
             .GroupBy(oi => new { oi.ProductId, oi.Name })
             .Select(g => new { g.Key.ProductId, g.Key.Name, Units = g.Sum(x => x.Qty), Revenue = g.Sum(x => x.Price * x.Qty) })
             .ToListAsync(ct);
-        var catById = await _db.Products.AsNoTracking().ToDictionaryAsync(p => p.Id, p => p.Category, ct);
+        // Kateqoriya bucket-i silinmiş məhsulu da düzgün qruplaşdırsın (yoxsa "Digər"-ə düşür).
+        var catById = await _db.Products.AsNoTracking().IgnoreQueryFilters().ToDictionaryAsync(p => p.Id, p => p.Category, ct);
 
         var totalUnits = itemAgg.Sum(x => x.Units);
         var totalRevenue = itemAgg.Sum(x => x.Revenue);

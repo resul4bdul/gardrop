@@ -28,6 +28,8 @@ public interface IAppDbContext
     DbSet<StoreCommission> StoreCommissions { get; }
     DbSet<StorePayout> StorePayouts { get; }
     DbSet<Dispute> Disputes { get; }
+    DbSet<Problem> Problems { get; }
+    DbSet<ProblemEvent> ProblemEvents { get; }
     DbSet<ActivityLog> ActivityLogs { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
