@@ -1,4 +1,4 @@
-// File: C:\Users\strax\OneDrive\Desktop\gardrop\frontend-next\app\magaza\layout.tsx
+// File: C:\Users\strax\OneDrive\Desktop\gardrop\frontend\app\magaza\layout.tsx
 import * as entry from '../../../../app/magaza/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

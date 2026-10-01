@@ -1,4 +1,4 @@
-// File: C:\Users\strax\OneDrive\Desktop\gardrop\frontend-next\app\profile\[[...tab]]\page.tsx
+// File: C:\Users\strax\OneDrive\Desktop\gardrop\frontend\app\profile\[[...tab]]\page.tsx
 import * as entry from '../../../../../app/profile/[[...tab]]/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
