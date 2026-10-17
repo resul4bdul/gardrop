@@ -3,8 +3,10 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.EntityFrameworkCore;
 using Gardrop.Infrastructure;
 using Gardrop.Presentation.Auth;
+using Gardrop.Infrastructure.Hosted;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -20,11 +22,17 @@ builder.Host.UseSerilog((ctx, cfg) => cfg
 builder.Services.AddGardropPersistence(builder.Configuration);
 builder.Services.AddGardropInfrastructure(builder.Configuration);
 
+// Reuse HttpClientFactory for external HTTP calls (enables connection pooling)
+builder.Services.AddHttpClient();
+
+// Run DB seeding as a background hosted service to avoid blocking startup
+builder.Services.AddHostedService<DbSeedHostedService>();
+
 // ── Secrets fail-fast (production) — sirlər env-dən gəlməlidir; boşdursa açılışda dayan (heç vaxt zəif default ilə işləmə).
 if (!builder.Environment.IsDevelopment())
 {
     if (string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("Default")))
-        throw new InvalidOperationException("ConnectionStrings:Default production-da təyin edilməlidir (env: ConnectionStrings__Default).");
+        throw new InvalidOperationException("ConnectionStrings:Default production-da təyin edilməlidir (env: ConnectionStrings__Default).);
     var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "";
     if (jwtSecret.Length < 32)
         throw new InvalidOperationException("Jwt:Secret production-da ən azı 32 simvol olmalıdır (env: Jwt__Secret).");
@@ -127,12 +135,12 @@ builder.Services.AddAuthorization(o =>
 
 var app = builder.Build();
 
-// ── DB schema + seed (servisdən əvvəl bloklayır — sxema hazır olmalıdır) ──
-// İlkin reytinq hesablaması artıq RatingRecomputeService (Hosted) tərəfindən fon-da edilir.
+// ── Apply DB migrations (non-blocking seed moved to hosted service) ──
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await DbSeeder.SeedAsync(db);
+    // Apply pending migrations to ensure schema exists; this is quick compared to heavy seeding.
+    db.Database.Migrate();
 }
 
 // ── Vahid istisna emalı (ən xarici middleware) ──
@@ -173,19 +181,23 @@ app.MapHealthChecks("/health/ready", new() { Predicate = hc => hc.Tags.Contains(
 
 // ── Yüklənmiş şəkilləri statik ver (/uploads) ──
 // Frontend ayrıca React app-dır (bax ../frontend); backend yalnız API + upload verir.
-// Yol UploadsPath.Resolve ilə LocalStorageService ilə eyni mənbədən gəlir (bax menfiler 5.3).
 var uploadsDir = Gardrop.Infrastructure.Services.UploadsPath.Resolve(builder.Configuration, builder.Environment.ContentRootPath);
 Directory.CreateDirectory(uploadsDir);
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(uploadsDir),
     RequestPath = "/uploads",
+    OnPrepareResponse = ctx =>
+    {
+        // Encourage caching on CDN / reverse proxy. Ensure invalidation on upload.
+        ctx.Context.Response.Headers["Cache-Control"] = "public,max-age=31536000";
+    }
 });
 
 // ── Naməlum /api üçün 404 (fallback — ən aşağı presedens) ──
 app.MapFallback("/api/{**rest}", () => Results.NotFound(new { error = "Endpoint tapılmadı" }));
 
-app.Logger.LogInformation("\n  🚀  Gardrop API çalışır\n  📦  API: http://localhost:3001/api\n  🖼️  Uploads: http://localhost:3001/uploads\n  🌐  Frontend (dev): http://localhost:5173\n");
+app.Logger.LogInformation("\n  🚀  Gardrop API çalışır\n  📦  API: http://localhost:3001/api\n  🖼️  Uploads: http://localhost:3001/uploads\n  🌐  Frontend (dev): http://localhost:5[..."]);
 
 app.Run();
 
