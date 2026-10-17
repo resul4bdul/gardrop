@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Gardrop.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+938d39ed4b08dbac94ddc4d332b0b19d9615d775")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+25f2841c3a7554b28b054d9fecd30437522055be")]
 [assembly: System.Reflection.AssemblyProductAttribute("Gardrop.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Gardrop.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

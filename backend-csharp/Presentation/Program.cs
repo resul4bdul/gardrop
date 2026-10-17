@@ -30,19 +30,25 @@ builder.Services.AddHttpClient();
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    // If running in container behind proxy with unknown network, clear known lists so forwarded headers are accepted.
-    // KnownNetworks and KnownProxies are obsolete; use KnownIPNetworks/KnownIPAddresses instead to avoid warnings.
+
     try
     {
-        options.KnownIPNetworks.Clear();
-        options.KnownIPAddresses.Clear();
+        var t = options.GetType();
+        foreach (var name in new[] { "KnownIPNetworks", "KnownIPAddresses" })
+        {
+            var prop = t.GetProperty(name);
+            if (prop == null) continue;
+            if (prop.GetValue(options) is System.Collections.IList lst)
+                lst.Clear();
+        }
     }
     catch
     {
-        // Fallback for older frameworks where these properties may not exist; keep original clear calls.
-        try { options.KnownNetworks.Clear(); } catch { }
-        try { options.KnownProxies.Clear(); } catch { }
+        // ignore reflection errors
     }
+
+    try { options.KnownIPNetworks.Clear(); } catch { }
+    try { options.KnownProxies.Clear(); } catch { }
 });
 
 // Run DB seeding as a background hosted service to avoid blocking startup
