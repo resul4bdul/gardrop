@@ -31,8 +31,18 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
     // If running in container behind proxy with unknown network, clear known lists so forwarded headers are accepted.
-    options.KnownNetworks.Clear();
-    options.KnownProxies.Clear();
+    // KnownNetworks and KnownProxies are obsolete; use KnownIPNetworks/KnownIPAddresses instead to avoid warnings.
+    try
+    {
+        options.KnownIPNetworks.Clear();
+        options.KnownIPAddresses.Clear();
+    }
+    catch
+    {
+        // Fallback for older frameworks where these properties may not exist; keep original clear calls.
+        try { options.KnownNetworks.Clear(); } catch { }
+        try { options.KnownProxies.Clear(); } catch { }
+    }
 });
 
 // Run DB seeding as a background hosted service to avoid blocking startup
@@ -102,7 +112,7 @@ builder.Services.AddOpenApi();
 
 // ── CORS — origin-lər konfiqurasiyadan (Cors:Origins). Boşdursa YALNIZ dev üçün hər origin;
 //    production-da boş origin = açılış xətası (fail fast, bax menfiler 5.2). ──
-var corsOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? [];
+var corsOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? Array.Empty<string>();
 if (corsOrigins.Length == 0 && !builder.Environment.IsDevelopment())
     throw new InvalidOperationException(
         "Cors:Origins production-da boş ola bilməz (AllowAnyOrigin təhlükəlidir). Konfiqurasiyada təyin et.");
