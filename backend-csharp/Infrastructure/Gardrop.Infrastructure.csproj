@@ -29,9 +29,10 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
-    <PackageReference Include="SkiaSharp" Version="4.153.1" />
     <!-- Şəkil sıxma/resize/WebP (upload-da thumbnail + optimizasiya, bax UploadController). -->
-    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+    <!-- Replaced SixLabors.ImageSharp with SkiaSharp + MetadataExtractor to avoid ImageSharp license/runtime issues -->
+    <PackageReference Include="SkiaSharp" Version="2.88.3" />
+    <PackageReference Include="MetadataExtractor" Version="2.5.0" />
   </ItemGroup>
 
   <ItemGroup>
