@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 using Gardrop.Infrastructure;
 using Gardrop.Presentation.Auth;
 using Gardrop.Infrastructure.Hosted;
@@ -24,6 +25,15 @@ builder.Services.AddGardropInfrastructure(builder.Configuration);
 
 // Reuse HttpClientFactory for external HTTP calls (enables connection pooling)
 builder.Services.AddHttpClient();
+
+// Forwarded headers (when behind proxy) — ensure RateLimiter uses real client IP.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // If running in container behind proxy with unknown network, clear known lists so forwarded headers are accepted.
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 // Run DB seeding as a background hosted service to avoid blocking startup
 builder.Services.AddHostedService<DbSeedHostedService>();
@@ -106,7 +116,12 @@ builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
 builder.Services.AddRateLimiter(o =>
 {
     o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    static string Ip(HttpContext c) => c.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+    static string Ip(HttpContext c)
+    {
+        var xf = c.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(xf)) return xf.Split(',')[0].Trim();
+        return c.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+    }
 
     // Global (IP üzrə) — bütün sorğular üçün DoS/bot müdafiəsi (dəqiqədə 120).
     o.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
@@ -135,12 +150,15 @@ builder.Services.AddAuthorization(o =>
 
 var app = builder.Build();
 
+// Honor forwarded headers before other middleware so IPs and scheme are correct
+app.UseForwardedHeaders();
+
 // ── Apply DB migrations (non-blocking seed moved to hosted service) ──
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     // Apply pending migrations to ensure schema exists; this is quick compared to heavy seeding.
-    db.Database.Migrate();
+    await db.Database.MigrateAsync();
 }
 
 // ── Vahid istisna emalı (ən xarici middleware) ──
@@ -197,7 +215,7 @@ app.UseStaticFiles(new StaticFileOptions
 // ── Naməlum /api üçün 404 (fallback — ən aşağı presedens) ──
 app.MapFallback("/api/{**rest}", () => Results.NotFound(new { error = "Endpoint tapılmadı" }));
 
-app.Logger.LogInformation("\n  🚀  Gardrop API çalışır\n  📦  API: http://localhost:3001/api\n  🖼️  Uploads: http://localhost:3001/uploads\n  🌐  Frontend (dev): http://localhost:5[..."]);
+app.Logger.LogInformation("\n  🚀  Gardrop API çalışır\n  📦  API: http://localhost:3001/api\n  🖼️  Uploads: http://localhost:3001/uploads\n  🌐  Frontend (dev): http://localhost:5[...]");
 
 app.Run();
 
