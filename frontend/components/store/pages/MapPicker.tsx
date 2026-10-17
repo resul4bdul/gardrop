@@ -3,7 +3,7 @@ import React from "react";
 import { Ic } from '../shared';
 import type { LatLng } from '../types';
 
-const { useState, useEffect, useRef } = React;
+const { useState, useEffect, useRef, useCallback } = React;
 
 export const BAKU_CENTER = { lat: 40.4093, lng: 49.8671 };
 const BAKU_BOUNDS = [[40.20, 49.60], [40.60, 50.20]]; // cənub-qərb / şimal-şərq künclər
@@ -12,19 +12,47 @@ export const MapPicker = ({ onClose, onSelect, initial }: { onClose: () => void;
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
+  const reverseCacheRef = useRef<Map<string, string>>(new Map());
+  const reverseTimerRef = useRef<number | null>(null);
   const [coord,setCoord] = useState<LatLng>(initial?.lat ? { lat:initial.lat, lng:initial.lng } : BAKU_CENTER);
   const [addr,setAddr] = useState('');
   const [loading,setLoading] = useState(false);
 
-  const reverse = async (lat: number,lng: number) => {
+  const reverse = useCallback((lat: number,lng: number) => {
+    const key = `${lat.toFixed(5)}:${lng.toFixed(5)}`;
+    const cached = reverseCacheRef.current.get(key);
+    if (cached) {
+      setAddr(cached);
+      setLoading(false);
+      return;
+    }
+
+    if (reverseTimerRef.current !== null) {
+      window.clearTimeout(reverseTimerRef.current);
+      reverseTimerRef.current = null;
+    }
+
     setLoading(true);
-    try{
-      const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&zoom=18&accept-language=az&lat=${lat}&lon=${lng}`);
-      const d = await r.json();
-      setAddr(d.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`);
-    }catch{ setAddr(`${lat.toFixed(5)}, ${lng.toFixed(5)}`); }
-    setLoading(false);
-  };
+    reverseTimerRef.current = window.setTimeout(async () => {
+      try {
+        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&zoom=18&accept-language=az&lat=${lat}&lon=${lng}`);
+        const d = await r.json();
+        const address = d.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        reverseCacheRef.current.set(key, address);
+        if (reverseCacheRef.current.size > 200) {
+          const firstKey = reverseCacheRef.current.keys().next().value;
+          if (firstKey) reverseCacheRef.current.delete(firstKey);
+        }
+        setAddr(address);
+      } catch {
+        const fallback = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        reverseCacheRef.current.set(key, fallback);
+        setAddr(fallback);
+      } finally {
+        setLoading(false);
+      }
+    }, 500);
+  }, []);
 
   useEffect(()=>{
     if(!window.L || !mapEl.current) return;
@@ -40,7 +68,13 @@ export const MapPicker = ({ onClose, onSelect, initial }: { onClose: () => void;
 
     reverse(coord.lat, coord.lng);
     setTimeout(()=>map.invalidateSize(), 120);
-    return ()=>{ map.remove(); mapRef.current=null; };
+    return ()=>{
+      if (reverseTimerRef.current !== null) {
+        window.clearTimeout(reverseTimerRef.current);
+        reverseTimerRef.current = null;
+      }
+      map.remove(); mapRef.current=null;
+    };
   // eslint-disable-next-line
   },[]);
 
@@ -72,8 +106,8 @@ export const MapPicker = ({ onClose, onSelect, initial }: { onClose: () => void;
             <p className="text-sm text-brand flex-1 min-h-[20px]">{loading ? <span className="text-t3">Ünvan tapılır…</span> : (addr || 'Xəritəyə klikləyin və ya markeri sürüşdürün')}</p>
           </div>
           <div className="flex gap-2">
-            <button className="flex items-center justify-center gap-1.5 border border-bdr text-brand px-4 py-2.5 rounded-btn text-sm font-semibold hover:border-bdr-s transition-colors" onClick={useMyLocation}><Ic.MapPin className="w-4 h-4"/> Mənim yerim</button>
-            <button className="flex-1 bg-brand text-white py-2.5 rounded-btn text-sm font-semibold hover:bg-brand-h transition-all active:scale-[0.98] disabled:opacity-60" disabled={loading} onClick={confirm}>Bu məkanı seç</button>
+            <button className="flex items-center justify-center gap-1.5 border border-bdr text-brand px-4 py-2.5 rounded-btn text-sm font-semibold hover:border-bdr-s transition-colors" onClick={useMyLocation}><Ic.GPS className="w-4 h-4"/>Mənim yerləşdiyim</button>
+            <button className="flex-1 bg-brand text-white py-2.5 rounded-btn text-sm font-semibold hover:bg-brand-h transition-all active:scale-[0.98] disabled:opacity-60" disabled={loading} onClick={confirm}>Seç</button>
           </div>
         </div>
       </div>
