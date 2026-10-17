@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Gardrop.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+545a528140f54cee8251c125f75a6dc5ffc326f1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d302a81a4f2c31b3ad77659bae397576bdf2d53e")]
 [assembly: System.Reflection.AssemblyProductAttribute("Gardrop.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Gardrop.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

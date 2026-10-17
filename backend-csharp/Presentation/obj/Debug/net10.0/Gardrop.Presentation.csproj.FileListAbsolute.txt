@@ -216,3 +216,6 @@ C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Presentation\obj\Debug\ne
 C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Presentation\obj\Debug\net10.0\Gardrop.Presentation.genruntimeconfig.cache
 C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Presentation\obj\Debug\net10.0\ref\Gardrop.Api.dll
 C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Presentation\obj\Debug\net10.0\Gardrop.Presentation.sourcelink.json
+C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Presentation\bin\Debug\net10.0\System.IO.Hashing.dll
+C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Presentation\bin\Debug\net10.0\System.Security.Cryptography.Pkcs.dll
+C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Presentation\bin\Debug\net10.0\runtimes\win\lib\net10.0\System.Security.Cryptography.Pkcs.dll

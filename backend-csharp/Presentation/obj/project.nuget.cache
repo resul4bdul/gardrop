@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "AR042gjcvKw=",
+  "dgSpecHash": "IKDefBzH7nk=",
   "success": true,
   "projectFilePath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Presentation\\Gardrop.Presentation.csproj",
   "expectedPackageFiles": [
@@ -58,7 +58,9 @@
     "C:\\Users\\strax\\.nuget\\packages\\serilog.sinks.console\\6.0.0\\serilog.sinks.console.6.0.0.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\serilog.sinks.debug\\3.0.0\\serilog.sinks.debug.3.0.0.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\serilog.sinks.file\\6.0.0\\serilog.sinks.file.6.0.0.nupkg.sha512",
-    "C:\\Users\\strax\\.nuget\\packages\\sixlabors.imagesharp\\3.1.12\\sixlabors.imagesharp.3.1.12.nupkg.sha512",
+    "C:\\Users\\strax\\.nuget\\packages\\skiasharp\\4.153.1\\skiasharp.4.153.1.nupkg.sha512",
+    "C:\\Users\\strax\\.nuget\\packages\\skiasharp.nativeassets.macos\\4.153.1\\skiasharp.nativeassets.macos.4.153.1.nupkg.sha512",
+    "C:\\Users\\strax\\.nuget\\packages\\skiasharp.nativeassets.win32\\4.153.1\\skiasharp.nativeassets.win32.4.153.1.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\system.codedom\\9.0.0\\system.codedom.9.0.0.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\system.composition\\9.0.0\\system.composition.9.0.0.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\system.composition.attributedmodel\\9.0.0\\system.composition.attributedmodel.9.0.0.nupkg.sha512",
@@ -72,95 +74,10 @@
     "C:\\Users\\strax\\.nuget\\packages\\system.management\\7.0.2\\system.management.7.0.2.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\system.reflection.metadataloadcontext\\7.0.0\\system.reflection.metadataloadcontext.7.0.0.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\system.resources.extensions\\9.0.0\\system.resources.extensions.9.0.0.nupkg.sha512",
-    "C:\\Users\\strax\\.nuget\\packages\\system.security.cryptography.pkcs\\10.0.0\\system.security.cryptography.pkcs.10.0.0.nupkg.sha512",
+    "C:\\Users\\strax\\.nuget\\packages\\system.security.cryptography.pkcs\\10.0.13\\system.security.cryptography.pkcs.10.0.13.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\system.security.cryptography.protecteddata\\9.0.0\\system.security.cryptography.protecteddata.9.0.0.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\system.security.permissions\\9.0.0\\system.security.permissions.9.0.0.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\system.windows.extensions\\9.0.0\\system.windows.extensions.9.0.0.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1902",
-      "level": "Warning",
-      "message": "Package 'SixLabors.ImageSharp' 3.1.12 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-gwg2-r3hj-4w44",
-      "projectPath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Presentation\\Gardrop.Presentation.csproj",
-      "warningLevel": 1,
-      "filePath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Presentation\\Gardrop.Presentation.csproj",
-      "libraryId": "SixLabors.ImageSharp",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    },
-    {
-      "code": "NU1903",
-      "level": "Warning",
-      "message": "Package 'SixLabors.ImageSharp' 3.1.12 has a known high severity vulnerability, https://github.com/advisories/GHSA-j3p4-wp97-rph4",
-      "projectPath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Presentation\\Gardrop.Presentation.csproj",
-      "warningLevel": 1,
-      "filePath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Presentation\\Gardrop.Presentation.csproj",
-      "libraryId": "SixLabors.ImageSharp",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    },
-    {
-      "code": "NU1903",
-      "level": "Warning",
-      "message": "Package 'SixLabors.ImageSharp' 3.1.12 has a known high severity vulnerability, https://github.com/advisories/GHSA-j9gm-c75j-xc9q",
-      "projectPath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Presentation\\Gardrop.Presentation.csproj",
-      "warningLevel": 1,
-      "filePath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Presentation\\Gardrop.Presentation.csproj",
-      "libraryId": "SixLabors.ImageSharp",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    },
-    {
-      "code": "NU1903",
-      "level": "Warning",
-      "message": "Package 'SixLabors.ImageSharp' 3.1.12 has a known high severity vulnerability, https://github.com/advisories/GHSA-jjfr-hcj7-qf5w",
-      "projectPath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Presentation\\Gardrop.Presentation.csproj",
-      "warningLevel": 1,
-      "filePath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Presentation\\Gardrop.Presentation.csproj",
-      "libraryId": "SixLabors.ImageSharp",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    },
-    {
-      "code": "NU1902",
-      "level": "Warning",
-      "message": "Package 'SixLabors.ImageSharp' 3.1.12 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-wmxv-xphr-5c9g",
-      "projectPath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Presentation\\Gardrop.Presentation.csproj",
-      "warningLevel": 1,
-      "filePath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Presentation\\Gardrop.Presentation.csproj",
-      "libraryId": "SixLabors.ImageSharp",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    },
-    {
-      "code": "NU1902",
-      "level": "Warning",
-      "message": "Package 'System.Security.Cryptography.Pkcs' 10.0.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-2fmv-rv2c-59x7",
-      "projectPath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Presentation\\Gardrop.Presentation.csproj",
-      "warningLevel": 1,
-      "filePath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Presentation\\Gardrop.Presentation.csproj",
-      "libraryId": "System.Security.Cryptography.Pkcs",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    },
-    {
-      "code": "NU1903",
-      "level": "Warning",
-      "message": "Package 'System.Security.Cryptography.Pkcs' 10.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-846f-f764-76mx",
-      "projectPath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Presentation\\Gardrop.Presentation.csproj",
-      "warningLevel": 1,
-      "filePath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Presentation\\Gardrop.Presentation.csproj",
-      "libraryId": "System.Security.Cryptography.Pkcs",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    }
-  ]
+  "logs": []
 }
