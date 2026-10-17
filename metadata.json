@@ -1,8 +1,0 @@
-{
-  "name": "Gardrop — Geyim marketplace",
-  "description": "Gardrop — Azərbaycanın geyim marketplace-i. Yerli mağazalardan geyim, ayaqqabı və aksesuarlar.",
-  "prompt": "Geyim marketplace",
-  "capabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
-}

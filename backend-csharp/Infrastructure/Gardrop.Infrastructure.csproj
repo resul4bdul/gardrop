@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Infrastructure + Persistence layer. Core-a istinad edir, ASP.NET-i framework kimi alır. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Gardrop.Infrastructure</RootNamespace>
+    <AssemblyName>Gardrop.Infrastructure</AssemblyName>
+  </PropertyGroup>
+
+  <!-- Middleware/DbContext/servislər ASP.NET tiplərindən istifadə edir (HttpContext, ILogger, IMemoryCache, IFormFile yoxdur). -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" Version="4.0.25.3" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.68.0" />
+    <PackageReference Include="MailKit" Version="4.17.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
+    <!-- Bütün EF paketləri Npgsql 10.0.0 ilə eyni versiyada saxlanılır (Core/Relational/Design)
+         ki, Presentation-a vahid versiya axsın və MSB3277 versiya münaqişəsi olmasın.
+         Qeyri-private — EF tipləri Presentation-a (məs. HealthController CountAsync) ötürülür. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+    <!-- Şəkil sıxma/resize/WebP (upload-da thumbnail + optimizasiya, bax UploadController). -->
+    <!-- Replaced SixLabors.ImageSharp with SkiaSharp + MetadataExtractor to avoid ImageSharp license/runtime issues -->
+    <PackageReference Include="SkiaSharp" Version="4.153.1" />
+    <PackageReference Include="MetadataExtractor" Version="2.5.0" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Gardrop.Core.csproj" />
+  </ItemGroup>
+
+</Project>
