@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -108,7 +109,6 @@ namespace Gardrop.Infrastructure.Services
                     matrix = matrix.PostConcat(SKMatrix.CreateTranslation(0, src.Height));
                     break;
                 case 5: // Mirror horizontal and rotate 270
-                    // Mirror horizontal then rotate 270 -> equivalent transform drawn appropriately
                     matrix = SKMatrix.CreateScale(-1, 1);
                     matrix = matrix.PostConcat(SKMatrix.CreateRotationDegrees(270));
                     matrix = matrix.PostConcat(SKMatrix.CreateTranslation(0, src.Width));
@@ -131,10 +131,12 @@ namespace Gardrop.Infrastructure.Services
             }
 
             canvas.Clear(SKColors.Transparent);
+            
             // Draw with matrix
-            using var paint = new SKPaint { FilterQuality = SKFilterQuality.High };
+            using var paint = new SKPaint();
+            var samplingOptions = new SKSamplingOptions(SKCubicResampler.Mitchell); // Yüksək keyfiyyət tənzimləməsi
             canvas.SetMatrix(matrix);
-            canvas.DrawBitmap(src, 0, 0, paint);
+            canvas.DrawBitmap(src, 0, 0, samplingOptions, paint);
             canvas.Flush();
 
             return dst;
@@ -161,10 +163,14 @@ namespace Gardrop.Infrastructure.Services
                 var tmp = new SKBitmap(info);
                 using var canvas = new SKCanvas(tmp);
                 canvas.Clear(SKColors.Transparent);
-                var srcRect = new SKRectI(0, 0, src.Width, src.Height);
+                
+                var srcRect = new SKRect(0, 0, src.Width, src.Height);
                 var dstRect = new SKRect(0, 0, newW, newH);
-                using var paint = new SKPaint { FilterQuality = SKFilterQuality.High };
-                canvas.DrawBitmap(src, srcRect, dstRect, paint);
+                
+                using var paint = new SKPaint();
+                var samplingOptions = new SKSamplingOptions(SKCubicResampler.Mitchell); // Yüksək keyfiyyət tənzimləməsi
+                
+                canvas.DrawBitmap(src, srcRect, dstRect, samplingOptions, paint);
                 canvas.Flush();
                 toEncode = tmp;
             }

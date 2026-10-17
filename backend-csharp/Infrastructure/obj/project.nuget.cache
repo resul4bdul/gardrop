@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "k8uaMz9RKsY=",
+  "dgSpecHash": "UDc1WA6xbqI=",
   "success": true,
   "projectFilePath": "C:\\Users\\strax\\OneDrive\\Desktop\\gardrop\\backend-csharp\\Infrastructure\\Gardrop.Infrastructure.csproj",
   "expectedPackageFiles": [
@@ -13,6 +13,7 @@
     "C:\\Users\\strax\\.nuget\\packages\\google.apis.core\\1.68.0\\google.apis.core.1.68.0.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\mailkit\\4.17.0\\mailkit.4.17.0.nupkg.sha512",
+    "C:\\Users\\strax\\.nuget\\packages\\metadataextractor\\2.5.0\\metadataextractor.2.5.0.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\10.0.8\\microsoft.aspnetcore.authentication.jwtbearer.10.0.8.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\microsoft.build\\17.7.2\\microsoft.build.17.7.2.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\microsoft.build.framework\\17.14.28\\microsoft.build.framework.17.14.28.nupkg.sha512",
@@ -61,7 +62,8 @@
     "C:\\Users\\strax\\.nuget\\packages\\system.security.cryptography.pkcs\\10.0.13\\system.security.cryptography.pkcs.10.0.13.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\system.security.cryptography.protecteddata\\9.0.0\\system.security.cryptography.protecteddata.9.0.0.nupkg.sha512",
     "C:\\Users\\strax\\.nuget\\packages\\system.security.permissions\\9.0.0\\system.security.permissions.9.0.0.nupkg.sha512",
-    "C:\\Users\\strax\\.nuget\\packages\\system.windows.extensions\\9.0.0\\system.windows.extensions.9.0.0.nupkg.sha512"
+    "C:\\Users\\strax\\.nuget\\packages\\system.windows.extensions\\9.0.0\\system.windows.extensions.9.0.0.nupkg.sha512",
+    "C:\\Users\\strax\\.nuget\\packages\\xmpcore\\6.1.10.1\\xmpcore.6.1.10.1.nupkg.sha512"
   ],
   "logs": []
 }

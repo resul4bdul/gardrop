@@ -136,6 +136,22 @@
           }
         }
       },
+      "MetadataExtractor/2.5.0": {
+        "type": "package",
+        "dependencies": {
+          "XmpCore": "6.1.10.1"
+        },
+        "compile": {
+          "lib/netstandard2.0/MetadataExtractor.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/MetadataExtractor.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Microsoft.AspNetCore.Authentication.JwtBearer/10.0.8": {
         "type": "package",
         "dependencies": {
@@ -1483,6 +1499,19 @@
           }
         }
       },
+      "XmpCore/6.1.10.1": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/XmpCore.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/XmpCore.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Gardrop.Core/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
@@ -1723,6 +1752,26 @@
         "lib/netstandard2.1/MailKit.xml",
         "mailkit.4.17.0.nupkg.sha512",
         "mailkit.nuspec"
+      ]
+    },
+    "MetadataExtractor/2.5.0": {
+      "sha512": "X0uobUBCiR/SBSB2WfyAL8iT17+G+gOuFny2lW4DQuG2dh8Gk0PrMmXNNX35GcilIBqHP8V+bCDCpswgVutXEw==",
+      "type": "package",
+      "path": "metadataextractor/2.5.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net35/MetadataExtractor.dll",
+        "lib/net35/MetadataExtractor.xml",
+        "lib/net45/MetadataExtractor.dll",
+        "lib/net45/MetadataExtractor.xml",
+        "lib/netstandard1.3/MetadataExtractor.dll",
+        "lib/netstandard1.3/MetadataExtractor.xml",
+        "lib/netstandard2.0/MetadataExtractor.dll",
+        "lib/netstandard2.0/MetadataExtractor.xml",
+        "metadata-extractor-logo-122.png",
+        "metadataextractor.2.5.0.nupkg.sha512",
+        "metadataextractor.nuspec"
       ]
     },
     "Microsoft.AspNetCore.Authentication.JwtBearer/10.0.8": {
@@ -3912,6 +3961,23 @@
         "useSharedDesignerContext.txt"
       ]
     },
+    "XmpCore/6.1.10.1": {
+      "sha512": "/Tp2/e39e7z8hLtS4TXt0FNNZHbf5yNFfHS0/59soXlgOzZlyRZivvzWpvujyaWkTWWgecp/1nHxkuc5vntn7A==",
+      "type": "package",
+      "path": "xmpcore/6.1.10.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net35/XmpCore.dll",
+        "lib/net35/XmpCore.xml",
+        "lib/netstandard1.0/XmpCore.dll",
+        "lib/netstandard1.0/XmpCore.xml",
+        "lib/netstandard2.0/XmpCore.dll",
+        "lib/netstandard2.0/XmpCore.xml",
+        "xmpcore.6.1.10.1.nupkg.sha512",
+        "xmpcore.nuspec"
+      ]
+    },
     "Gardrop.Core/1.0.0": {
       "type": "project",
       "path": "../Core/Gardrop.Core.csproj",
@@ -3925,6 +3991,7 @@
       "Gardrop.Core >= 1.0.0",
       "Google.Apis.Auth >= 1.68.0",
       "MailKit >= 4.17.0",
+      "MetadataExtractor >= 2.5.0",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 10.0.8",
       "Microsoft.EntityFrameworkCore >= 10.0.0",
       "Microsoft.EntityFrameworkCore.Design >= 10.0.0",
@@ -3997,6 +4064,10 @@
           "MailKit": {
             "target": "Package",
             "version": "[4.17.0, )"
+          },
+          "MetadataExtractor": {
+            "target": "Package",
+            "version": "[2.5.0, )"
           },
           "Microsoft.AspNetCore.Authentication.JwtBearer": {
             "target": "Package",

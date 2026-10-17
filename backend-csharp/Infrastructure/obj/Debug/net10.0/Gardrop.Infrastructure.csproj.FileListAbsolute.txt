@@ -55,10 +55,10 @@ C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Infrastructure\obj\Debug\
 C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Infrastructure\obj\Debug\net10.0\Gardrop.Infrastructure.AssemblyInfoInputs.cache
 C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Infrastructure\obj\Debug\net10.0\Gardrop.Infrastructure.AssemblyInfo.cs
 C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Infrastructure\obj\Debug\net10.0\Gardrop.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Infrastructure\obj\Debug\net10.0\Gardrop.Infrastructure.sourcelink.json
 C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Infrastructure\obj\Debug\net10.0\Gardrop..7E96AA21.Up2Date
 C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Infrastructure\obj\Debug\net10.0\Gardrop.Infrastructure.dll
 C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Infrastructure\obj\Debug\net10.0\refint\Gardrop.Infrastructure.dll
 C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Infrastructure\obj\Debug\net10.0\Gardrop.Infrastructure.pdb
 C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Infrastructure\obj\Debug\net10.0\Gardrop.Infrastructure.genruntimeconfig.cache
 C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Infrastructure\obj\Debug\net10.0\ref\Gardrop.Infrastructure.dll
-C:\Users\strax\OneDrive\Desktop\gardrop\backend-csharp\Infrastructure\obj\Debug\net10.0\Gardrop.Infrastructure.sourcelink.json
