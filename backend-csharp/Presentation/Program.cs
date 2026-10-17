@@ -42,7 +42,7 @@ builder.Services.AddHostedService<DbSeedHostedService>();
 if (!builder.Environment.IsDevelopment())
 {
     if (string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("Default")))
-        throw new InvalidOperationException("ConnectionStrings:Default production-da təyin edilməlidir (env: ConnectionStrings__Default).);
+        throw new InvalidOperationException("ConnectionStrings:Default production-da təyin edilməlidir (env: ConnectionStrings__Default).");
     var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "";
     if (jwtSecret.Length < 32)
         throw new InvalidOperationException("Jwt:Secret production-da ən azı 32 simvol olmalıdır (env: Jwt__Secret).");
@@ -215,7 +215,7 @@ app.UseStaticFiles(new StaticFileOptions
 // ── Naməlum /api üçün 404 (fallback — ən aşağı presedens) ──
 app.MapFallback("/api/{**rest}", () => Results.NotFound(new { error = "Endpoint tapılmadı" }));
 
-app.Logger.LogInformation("\n  🚀  Gardrop API çalışır\n  📦  API: http://localhost:3001/api\n  🖼️  Uploads: http://localhost:3001/uploads\n  🌐  Frontend (dev): http://localhost:5[...]");
+app.Logger.LogInformation("\n  🚀  Gardrop API çalışır\n  📦  API: http://localhost:3001/api\n  🖼️  Uploads: http://localhost:3001/uploads\n  🌐  Frontend (dev): http://localhost:5173\n");
 
 app.Run();
 
